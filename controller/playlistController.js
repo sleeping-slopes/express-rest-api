@@ -24,6 +24,10 @@ exports.getByID = (req,res) =>
         {
             response.status(400,error,res);
         }
+        else if (rows.length<1)
+        {
+            response.status(404,{error: 'playlist not found'},res);
+        }
         else
         {
             const row = rows[0];
@@ -40,6 +44,7 @@ exports.getByID = (req,res) =>
                     {
                         row.artists.push({id:artist.artistID,name:artist.artistPseudoName?artist.artistPseudoName:artist.artistName});
                     });
+
                     response.status(200,row,res);
                 }
             })
@@ -58,6 +63,32 @@ exports.getSongs = (req,res) =>
         else
         {
             response.status(200,rows,res);
+        }
+    })
+}
+
+exports.getCover = (req,res) =>
+{
+    connection.query("SELECT `coversrc` FROM `playlists` WHERE `id` = ?",[req.params.id],(error,rows,fields)=>
+    {
+        if (error)
+        {
+            response.status(400,error,res);
+        }
+        else if (rows.length<1)
+        {
+            response.status(404,{error: 'playlist not found'},res);
+        }
+        else
+        {
+            const row = rows[0];
+            res.sendFile("images/covers/"+row.coversrc,{root: '.'}, function (error)
+            {
+                if (error)
+                {
+                  response.status(error.status,error,res);
+                }
+            });
         }
     })
 }

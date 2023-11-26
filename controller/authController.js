@@ -41,7 +41,7 @@ exports.signUp = (req,res) =>
                 else
                 {
                     const token = jwt.sign({ id: results.insertId },config.JWTSECRET,{ expiresIn: 60 * 120});
-                    response.status(200,{message:'user has been successfully registered',token: "Bearer " + token,results},res);
+                    response.status(200,{error:'user has been successfully registered',token: "Bearer " + token,results},res);
                 }
             })
         }

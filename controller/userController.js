@@ -11,6 +11,10 @@ exports.getByID = (req,res) =>
         {
             response.status(400,error,res);
         }
+        else if (rows.length<1)
+        {
+            response.status(404,{error: 'user not found'},res);
+        }
         else
         {
             const row = rows[0];

@@ -3,7 +3,7 @@ const connection = require('../settings/database')
 
 exports.getAll = (req,res) =>
 {
-    connection.query("SELECT `id` FROM `songs`",(error,rows,fields)=>
+    connection.query("SELECT `id`,`id` as `pos` FROM `songs`",(error,rows,fields)=>
     {
         if (error)
         {
@@ -18,11 +18,15 @@ exports.getAll = (req,res) =>
 
 exports.getByID = (req,res) =>
 {
-    connection.query("SELECT * FROM `songs` WHERE `id` = ?",[req.params.id],(error,rows,fields)=>
+    connection.query("SELECT `id`,`name`,`coversrc` FROM `songs` WHERE `id` = ?",[req.params.id],(error,rows,fields)=>
     {
         if (error)
         {
             response.status(400,error,res);
+        }
+        else if (rows.length<1)
+        {
+            response.status(404,{error: 'song not found'},res);
         }
         else
         {
@@ -43,6 +47,59 @@ exports.getByID = (req,res) =>
                     response.status(200,row,res);
                 }
             })
+        }
+    })
+}
+
+exports.getAudio = (req,res) =>
+{
+    connection.query("SELECT `audiosrc` FROM `songs` WHERE `id` = ?",[req.params.id],(error,rows,fields)=>
+    {
+        if (error)
+        {
+            response.status(400,error,res);
+        }
+        else if (rows.length<1)
+        {
+            response.status(404,{error: 'song not found'},res);
+        }
+        else
+        {
+            const row = rows[0];
+            const fs = require('fs');
+            fs.readFile("audio/"+row.audiosrc,{root: '.'}, function(error, result)
+            {
+                if (error)
+                    response.status(400,error,res);
+                else
+                    response.status(200,result.toString("base64"),res);
+            });
+        }
+    })
+}
+
+exports.getCover = (req,res) =>
+{
+    connection.query("SELECT `coversrc` FROM `songs` WHERE `id` = ?",[req.params.id],(error,rows,fields)=>
+    {
+        if (error)
+        {
+            response.status(400,error,res);
+        }
+        else if (rows.length<1)
+        {
+            response.status(404,{error: 'song not found'},res);
+        }
+        else
+        {
+            const row = rows[0];
+            res.sendFile("images/covers/"+row.coversrc,{root: '.'}, function (error)
+            {
+                if (error)
+                {
+                  response.status(error.status,error,res);
+                }
+            });
         }
     })
 }

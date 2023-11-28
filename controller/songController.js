@@ -18,7 +18,7 @@ exports.getAll = (req,res) =>
 
 exports.getByID = (req,res) =>
 {
-    connection.query("SELECT `id`,`name`,`coversrc` FROM `songs` WHERE `id` = ?",[req.params.id],(error,rows,fields)=>
+    connection.query("SELECT `id`,`name` FROM `songs` WHERE `id` = ?",[req.params.id],(error,rows,fields)=>
     {
         if (error)
         {
@@ -67,12 +67,9 @@ exports.getAudio = (req,res) =>
         {
             const row = rows[0];
             const fs = require('fs');
-            fs.readFile("audio/"+row.audiosrc,{root: '.'}, function(error, result)
+            res.sendFile("audio/"+row.audiosrc,{root: '.'}, (error)=>
             {
-                if (error)
-                    response.status(400,error,res);
-                else
-                    response.status(200,result.toString("base64"),res);
+                if (error) console.log(error);
             });
         }
     })

@@ -1,5 +1,7 @@
 module.exports = (app) =>
 {
+
+
     const authController = require('../controller/authController');
     app.route('/api/auth/signup').post(authController.signUp);
     app.route('/api/auth/login').post(authController.logIn);

@@ -32,6 +32,7 @@ exports.getByID = (req,res) =>
         {
             const row = rows[0];
             row.artists = [];
+            row.duration = 666;
             connection.query('SELECT * FROM `view_song_artists` WHERE `songID` = ?',[row.id],(error,artists)=>
             {
                 if (error)

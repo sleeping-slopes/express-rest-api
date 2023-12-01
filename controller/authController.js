@@ -5,7 +5,7 @@ const config = require('../config')
 
 exports.signUp = (req,res) =>
 {
-    connection.query("SELECT `id`,`email`,`username` FROM `users` WHERE `email` =  ? OR `username` = ?", [req.body.email,req.body.username],(error,rows,fields)=>
+    connection.query("SELECT `username`,`email` FROM `users` WHERE `email` =  ? OR `username` = ?", [req.body.email,req.body.username],(error,rows,fields)=>
     {
         if (error)
         {
@@ -40,8 +40,9 @@ exports.signUp = (req,res) =>
                 }
                 else
                 {
-                    const token = jwt.sign({ id: results.insertId },config.JWTSECRET,{ expiresIn: 60 * 120});
-                    response.status(200,{error:'user has been successfully registered',token: "Bearer " + token,results},res);
+                    const token = jwt.sign({ username: req.body.username },config.JWTSECRET,{ expiresIn: 60 * 120});
+                    console.log(token);
+                    response.status(200,{message:'user has been successfully registered',token: "Bearer " + token,results},res);
                 }
             })
         }
@@ -66,7 +67,7 @@ exports.logIn = (req,res) =>
             const row = rows[0];
             if (row.password==req.body.password)
             {
-                const token = jwt.sign({ id: row.id },config.JWTSECRET,{ expiresIn: 60 * 120});
+                const token = jwt.sign({ username: row.username },config.JWTSECRET,{ expiresIn: 60 * 120});
                 response.status(200,{token: "Bearer " + token},res);
             }
             else

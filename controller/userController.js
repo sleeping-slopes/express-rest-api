@@ -3,9 +3,9 @@ const connection = require('../settings/database')
 
 
 
-exports.getByID = (req,res) =>
+exports.getByUsername = (req,res) =>
 {
-    connection.query('SELECT `username`,`email`,`profile_picture` FROM `users` WHERE `id` = ?',[req.user.id],(error,rows,fields)=>
+    connection.query('SELECT `username`,`email`,`profile_picture` FROM `users` WHERE `username` = ?',[req.user.username],(error,rows,fields)=>
     {
         if (error)
         {
@@ -23,32 +23,74 @@ exports.getByID = (req,res) =>
     })
 }
 
-exports.getPlaylists = (req,res) =>
+exports.getByUsername222 = (req,res) =>
 {
-    connection.query('SELECT `playlistID` as `id` FROM `user_playlists` WHERE `userID` = ?',[req.user.id],(error,rows,fields)=>
+    connection.query('SELECT `username`,`status`,`description` FROM `users` WHERE `username` = ?',[req.params.username],(error,rows,fields)=>
     {
         if (error)
         {
             response.status(400,error,res);
         }
+        else if (rows.length<1)
+        {
+            response.status(404,{error: 'user not found'},res);
+        }
         else
         {
-            response.status(200,rows,res);
+            const row = rows[0];
+            response.status(200,row,res);
         }
     })
 }
 
-exports.getSongs = (req,res) =>
+exports.getProfilePicture = (req,res) =>
 {
-    connection.query('SELECT `songID` as `id` FROM `user_songs` WHERE `userID` = ?',[req.user.id],(error,rows,fields)=>
+    connection.query("SELECT `profile_picture` FROM `users` WHERE `username` = ?",[req.params.username],(error,rows,fields)=>
     {
         if (error)
         {
             response.status(400,error,res);
         }
+        else if (rows.length<1)
+        {
+            response.status(404,{error: 'user not found'},res);
+        }
         else
         {
-            response.status(200,rows,res);
+            const row = rows[0];
+            res.sendFile("images/user images/profile pictures/"+row.profile_picture,{root: '.'}, function (error)
+            {
+                if (error)
+                {
+                  response.status(error.status,error,res);
+                }
+            });
+        }
+    })
+}
+
+exports.getBanner = (req,res) =>
+{
+    connection.query("SELECT `banner` FROM `users` WHERE `username` = ?",[req.params.username],(error,rows,fields)=>
+    {
+        if (error)
+        {
+            response.status(400,error,res);
+        }
+        else if (rows.length<1)
+        {
+            response.status(404,{error: 'user not found'},res);
+        }
+        else
+        {
+            const row = rows[0];
+            res.sendFile("images/user images/banner/"+row.banner,{root: '.'}, function (error)
+            {
+                if (error)
+                {
+                  response.status(error.status,error,res);
+                }
+            });
         }
     })
 }

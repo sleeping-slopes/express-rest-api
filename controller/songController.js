@@ -43,7 +43,7 @@ exports.getByID = (req,res) =>
                 {
                     artists.forEach(artist=>
                     {
-                        row.artists.push({id:artist.artistID,name:artist.artistPseudoName?artist.artistPseudoName:artist.artistName});
+                        row.artists.push({login:artist.artistLogin,name:artist.pseudoname?artist.pseudoname:artist.name});
                     });
                     response.status(200,row,res);
                 }

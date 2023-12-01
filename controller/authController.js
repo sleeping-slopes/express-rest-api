@@ -5,7 +5,7 @@ const config = require('../config')
 
 exports.signUp = (req,res) =>
 {
-    connection.query("SELECT `username`,`email` FROM `users` WHERE `email` =  ? OR `username` = ?", [req.body.email,req.body.username],(error,rows,fields)=>
+    connection.query("SELECT `login`,`email` FROM `users` WHERE `email` =  ? OR `login` = ?", [req.body.email,req.body.login],(error,rows,fields)=>
     {
         if (error)
         {
@@ -21,9 +21,9 @@ exports.signUp = (req,res) =>
                 {
                     error.emailError = 'account with this email already exists';
                 }
-                if (r.username==req.body.username)
+                if (r.login==req.body.login)
                 {
-                    error.usernameError = 'account with this username already exists';
+                    error.loginError = 'account with this login already exists';
                 }
                 return true;
             });
@@ -31,8 +31,8 @@ exports.signUp = (req,res) =>
         }
         else
         {
-            const sql = 'INSERT INTO `users`(`username`,`email`,`password`) VALUES (?,?,?)';
-            connection.query(sql,[req.body.username,req.body.email,req.body.password],(error,results)=>
+            const sql = 'INSERT INTO `users`(`login`,`email`,`password`) VALUES (?,?,?)';
+            connection.query(sql,[req.body.login,req.body.email,req.body.password],(error,results)=>
             {
                 if (error)
                 {
@@ -40,8 +40,7 @@ exports.signUp = (req,res) =>
                 }
                 else
                 {
-                    const token = jwt.sign({ username: req.body.username },config.JWTSECRET,{ expiresIn: 60 * 120});
-                    console.log(token);
+                    const token = jwt.sign({ login: req.body.login },config.JWTSECRET,{ expiresIn: 60 * 120});
                     response.status(200,{message:'user has been successfully registered',token: "Bearer " + token,results},res);
                 }
             })
@@ -51,7 +50,7 @@ exports.signUp = (req,res) =>
 
 exports.logIn = (req,res) =>
 {
-    connection.query("SELECT * FROM `users` WHERE (`username` = ? OR `email` = ?)", [req.body.username,req.body.username],(error,rows,fields)=>
+    connection.query("SELECT * FROM `users` WHERE (`login` = ? OR `email` = ?)", [req.body.login,req.body.email],(error,rows,fields)=>
     {
         if (error)
         {
@@ -59,7 +58,7 @@ exports.logIn = (req,res) =>
         }
         else if (rows.length<1)
         {
-            const error = { usernameError: 'user with this username/email does not exist' };
+            const error = { loginError: 'user with this login/email does not exist' };
             response.status(401,error,res);
         }
         else
@@ -67,7 +66,7 @@ exports.logIn = (req,res) =>
             const row = rows[0];
             if (row.password==req.body.password)
             {
-                const token = jwt.sign({ username: row.username },config.JWTSECRET,{ expiresIn: 60 * 120});
+                const token = jwt.sign({ login: row.login },config.JWTSECRET,{ expiresIn: 60 * 120});
                 response.status(200,{token: "Bearer " + token},res);
             }
             else

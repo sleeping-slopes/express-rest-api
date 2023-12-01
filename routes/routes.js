@@ -21,10 +21,10 @@ module.exports = (app) =>
     const middleware = require('./../middleware/middleware');
 
     const userController = require('./../controller/userController');
-    app.route("/api/user/").get(middleware.authToken, userController.getByUsername);
+    app.route("/api/user/").get(middleware.authToken, userController.getByVerifiedJWT);
     // app.route("/api/user/playlists").get(middleware.authToken, userController.getPlaylists);
     // app.route("/api/user/songs").get(middleware.authToken, userController.getSongs);
-    app.route("/api/user/:username").get(userController.getByUsername222);
-    app.route("/api/user/:username/picture").get(userController.getProfilePicture);
-    app.route("/api/user/:username/banner").get(userController.getBanner);
+    app.route("/api/user/:login").get(userController.getByLogin);
+    app.route("/api/user/:login/picture").get(userController.getProfilePicture);
+    app.route("/api/user/:login/banner").get(userController.getBanner);
 }

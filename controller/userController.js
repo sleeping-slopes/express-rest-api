@@ -3,9 +3,9 @@ const connection = require('../settings/database')
 
 
 
-exports.getByUsername = (req,res) =>
+exports.getByVerifiedJWT = (req,res) =>
 {
-    connection.query('SELECT `username`,`email`,`profile_picture` FROM `users` WHERE `username` = ?',[req.user.username],(error,rows,fields)=>
+    connection.query('SELECT `login` FROM `users` WHERE `login` = ?',[req.user.login],(error,rows,fields)=>
     {
         if (error)
         {
@@ -23,9 +23,9 @@ exports.getByUsername = (req,res) =>
     })
 }
 
-exports.getByUsername222 = (req,res) =>
+exports.getByLogin = (req,res) =>
 {
-    connection.query('SELECT `username`,`status`,`description` FROM `users` WHERE `username` = ?',[req.params.username],(error,rows,fields)=>
+    connection.query('SELECT `username`,`status`,`description` FROM `users` WHERE `login` = ?',[req.params.login],(error,rows,fields)=>
     {
         if (error)
         {
@@ -45,7 +45,7 @@ exports.getByUsername222 = (req,res) =>
 
 exports.getProfilePicture = (req,res) =>
 {
-    connection.query("SELECT `profile_picture` FROM `users` WHERE `username` = ?",[req.params.username],(error,rows,fields)=>
+    connection.query("SELECT `profile_picture` FROM `users` WHERE `login` = ?",[req.params.login],(error,rows,fields)=>
     {
         if (error)
         {
@@ -71,7 +71,7 @@ exports.getProfilePicture = (req,res) =>
 
 exports.getBanner = (req,res) =>
 {
-    connection.query("SELECT `banner` FROM `users` WHERE `username` = ?",[req.params.username],(error,rows,fields)=>
+    connection.query("SELECT `banner` FROM `users` WHERE `login` = ?",[req.params.login],(error,rows,fields)=>
     {
         if (error)
         {

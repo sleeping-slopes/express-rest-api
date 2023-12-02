@@ -43,6 +43,40 @@ exports.getByLogin = (req,res) =>
     })
 }
 
+exports.getLikedSongs = (req,res) =>
+{
+
+    connection.query('SELECT `songID` as `id`, ROW_NUMBER() OVER(PARTITION BY null ) AS `pos` FROM `song_likes` WHERE `userLogin` = ?',[req.params.login],(error,rows,fields)=>
+    {
+
+        if (error)
+        {
+            response.status(400,error,res);
+        }
+        else
+        {
+            response.status(200,rows,res);
+        }
+    })
+}
+
+exports.getSongs = (req,res) =>
+{
+
+    connection.query('SELECT `songID` as `id`, ROW_NUMBER() OVER(PARTITION BY null ) AS `pos` FROM `view_song_artists` WHERE `login` = ?',[req.params.login],(error,rows,fields)=>
+    {
+
+        if (error)
+        {
+            response.status(400,error,res);
+        }
+        else
+        {
+            response.status(200,rows,res);
+        }
+    })
+}
+
 exports.getProfilePicture = (req,res) =>
 {
     connection.query("SELECT `profile_picture` FROM `users` WHERE `login` = ?",[req.params.login],(error,rows,fields)=>

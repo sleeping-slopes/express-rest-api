@@ -3,7 +3,7 @@ const connection = require('../settings/database')
 
 exports.getAll = (req,res) =>
 {
-    connection.query("SELECT `id`,`id` as `pos` FROM `songs`",(error,rows,fields)=>
+    connection.query("SELECT `id`,ROW_NUMBER() OVER(PARTITION BY null ) AS `pos` FROM `songs`",(error,rows,fields)=>
     {
         if (error)
         {
@@ -43,7 +43,7 @@ exports.getByID = (req,res) =>
                 {
                     artists.forEach(artist=>
                     {
-                        row.artists.push({login:artist.artistLogin,name:artist.pseudoname?artist.pseudoname:artist.name});
+                        row.artists.push({login:artist.login,name:artist.pseudoname?artist.pseudoname:artist.username});
                     });
                     response.status(200,row,res);
                 }

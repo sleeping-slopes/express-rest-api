@@ -3,7 +3,7 @@ const connection = require('../settings/database')
 
 exports.getAll = (req,res) =>
 {
-    connection.query("SELECT `id`,ROW_NUMBER() OVER(PARTITION BY null ) AS `pos` FROM `songs`",(error,rows,fields)=>
+    connection.query("SELECT `id`,ROW_NUMBER() OVER(PARTITION BY null ORDER BY `songs`.`created_at` DESC) AS `pos` FROM `songs`",(error,rows,fields)=>
     {
         if (error)
         {
@@ -18,7 +18,7 @@ exports.getAll = (req,res) =>
 
 exports.getByID = (req,res) =>
 {
-    connection.query("SELECT `id`,`name` FROM `songs` WHERE `id` = ?",[req.params.id],(error,rows,fields)=>
+    connection.query("SELECT `id`,`name`,`duration` FROM `songs` WHERE `id` = ?",[req.params.id],(error,rows,fields)=>
     {
         if (error)
         {
@@ -32,8 +32,7 @@ exports.getByID = (req,res) =>
         {
             const row = rows[0];
             row.artists = [];
-            row.duration = 666;
-            connection.query('SELECT * FROM `view_song_artists` WHERE `songID` = ?',[row.id],(error,artists)=>
+            connection.query('SELECT `login`,`username`,`pseudoname` FROM `view_song_artists` WHERE `songID` = ? ORDER BY `view_song_artists`.`artistSongPosition`',[row.id],(error,artists)=>
             {
                 if (error)
                 {

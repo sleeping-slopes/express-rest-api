@@ -25,7 +25,7 @@ exports.getByVerifiedJWT = (req,res) =>
 
 exports.getByLogin = (req,res) =>
 {
-    connection.query('SELECT `username`,`status`,`description` FROM `users` WHERE `login` = ?',[req.params.login],(error,rows,fields)=>
+    connection.query('SELECT `username`,`status`,`bio`,`city`,`country`,`verified` FROM `users` WHERE `login` = ?',[req.params.login],(error,rows,fields)=>
     {
         if (error)
         {
@@ -46,7 +46,7 @@ exports.getByLogin = (req,res) =>
 exports.getLikedSongs = (req,res) =>
 {
 
-    connection.query('SELECT `songID` as `id`, ROW_NUMBER() OVER(PARTITION BY null ) AS `pos` FROM `song_likes` WHERE `userLogin` = ?',[req.params.login],(error,rows,fields)=>
+    connection.query('SELECT `songID` as `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `song_likes`.`time` DESC) AS `pos` FROM `song_likes` WHERE `userLogin` = ?',[req.params.login],(error,rows,fields)=>
     {
 
         if (error)
@@ -62,7 +62,7 @@ exports.getLikedSongs = (req,res) =>
 
 exports.getLikedPlaylists = (req,res) =>
 {
-    connection.query('SELECT `playlistID` as `id` FROM `playlist_likes` WHERE `userLogin` = ?',[req.params.login],(error,rows,fields)=>
+    connection.query('SELECT `playlistID` as `id` FROM `playlist_likes` WHERE `userLogin` = ? ORDER BY `playlist_likes`.`time` DESC',[req.params.login],(error,rows,fields)=>
     {
 
         if (error)
@@ -79,7 +79,7 @@ exports.getLikedPlaylists = (req,res) =>
 exports.getSongs = (req,res) =>
 {
 
-    connection.query('SELECT `songID` as `id`, ROW_NUMBER() OVER(PARTITION BY null ) AS `pos` FROM `view_song_artists` WHERE `login` = ?',[req.params.login],(error,rows,fields)=>
+    connection.query('SELECT `songID` as `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `created_at` DESC) AS `pos` FROM `view_song_artists` WHERE `login` = ?',[req.params.login],(error,rows,fields)=>
     {
 
         if (error)

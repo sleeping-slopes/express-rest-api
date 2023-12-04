@@ -25,6 +25,7 @@ module.exports = (app) =>
     app.route("/api/user/:login").get(userController.getByLogin);
     app.route("/api/user/:login/picture").get(userController.getProfilePicture);
     app.route("/api/user/:login/banner").get(userController.getBanner);
-    app.route("/api/user/:login/likes/songs").get(userController.getLikedSongs);
     app.route("/api/user/:login/songs").get(userController.getSongs);
+    app.route("/api/user/:login/likes/songs").get(userController.getLikedSongs);
+    app.route("/api/user/:login/likes/playlists").get(userController.getLikedPlaylists);
 }

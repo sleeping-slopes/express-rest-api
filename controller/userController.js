@@ -60,6 +60,22 @@ exports.getLikedSongs = (req,res) =>
     })
 }
 
+exports.getLikedPlaylists = (req,res) =>
+{
+    connection.query('SELECT `playlistID` as `id` FROM `playlist_likes` WHERE `userLogin` = ?',[req.params.login],(error,rows,fields)=>
+    {
+
+        if (error)
+        {
+            response.status(400,error,res);
+        }
+        else
+        {
+            response.status(200,rows,res);
+        }
+    })
+}
+
 exports.getSongs = (req,res) =>
 {
 

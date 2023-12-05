@@ -22,10 +22,13 @@ module.exports = (app) =>
 
     const userController = require('./../controller/userController');
     app.route("/api/user/").get(middleware.authToken, userController.getByVerifiedJWT);
-    app.route("/api/user/:login").get(userController.getByLogin);
+    app.route("/api/user/:login/username").get(userController.getUsername);
+    app.route("/api/user/:login/profile").get(userController.getProfile);
     app.route("/api/user/:login/picture").get(userController.getProfilePicture);
     app.route("/api/user/:login/banner").get(userController.getBanner);
     app.route("/api/user/:login/songs").get(userController.getSongs);
+    app.route("/api/user/:login/playlists").get(userController.getPlaylists);
     app.route("/api/user/:login/likes/songs").get(userController.getLikedSongs);
     app.route("/api/user/:login/likes/playlists").get(userController.getLikedPlaylists);
+    app.route("/api/user/:login/links").get(userController.getLinks);
 }

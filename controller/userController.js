@@ -23,9 +23,9 @@ exports.getByVerifiedJWT = (req,res) =>
     })
 }
 
-exports.getByLogin = (req,res) =>
+exports.getUsername = (req,res) =>
 {
-    connection.query('SELECT `username`,`status`,`bio`,`city`,`country`,`verified` FROM `users` WHERE `login` = ?',[req.params.login],(error,rows,fields)=>
+    connection.query('SELECT `username` FROM `users` WHERE `login` = ?',[req.params.login],(error,rows,fields)=>
     {
         if (error)
         {
@@ -39,6 +39,42 @@ exports.getByLogin = (req,res) =>
         {
             const row = rows[0];
             response.status(200,row,res);
+        }
+    })
+}
+
+exports.getProfile = (req,res) =>
+{
+    connection.query('SELECT * FROM `view_user_profile` WHERE `login` = ?',[req.params.login],(error,rows,fields)=>
+    {
+        if (error)
+        {
+            response.status(400,error,res);
+        }
+        else if (rows.length<1)
+        {
+            response.status(404,{error: 'user not found'},res);
+        }
+        else
+        {
+            const row = rows[0];
+            response.status(200,row,res);
+        }
+    })
+}
+
+exports.getLinks = (req,res) =>
+{
+    connection.query('SELECT `url`,`description` FROM `user_links` WHERE `userLogin` = ?',[req.params.login],(error,rows,fields)=>
+    {
+        if (error)
+        {
+            response.status(400,error,res);
+        }
+        else
+        {
+            rows.forEach(row => { if (!row.description) row.description=row.url });
+            response.status(200,rows,res);
         }
     })
 }
@@ -92,6 +128,25 @@ exports.getSongs = (req,res) =>
         }
     })
 }
+
+exports.getPlaylists = (req,res) =>
+{
+
+    connection.query('SELECT `playlistID` as `id` FROM `view_playlist_artists` WHERE `login` = ? ORDER BY `created_at` DESC',[req.params.login],(error,rows,fields)=>
+    {
+
+        if (error)
+        {
+            response.status(400,error,res);
+        }
+        else
+        {
+            response.status(200,rows,res);
+        }
+    })
+}
+
+
 
 exports.getProfilePicture = (req,res) =>
 {

@@ -31,4 +31,6 @@ module.exports = (app) =>
     app.route("/api/user/:login/likes/songs").get(userController.getLikedSongs);
     app.route("/api/user/:login/likes/playlists").get(userController.getLikedPlaylists);
     app.route("/api/user/:login/links").get(userController.getLinks);
+    app.route("/api/user/:login/followers").get(userController.getFollowers);
+    app.route("/api/user/:login/following").get(userController.getFollowing);
 }

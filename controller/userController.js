@@ -199,3 +199,34 @@ exports.getBanner = (req,res) =>
         }
     })
 }
+
+exports.getFollowers = (req,res) =>
+{
+    connection.query('SELECT `user_follower_login` as `login` FROM `user_follows` WHERE `user_login` = ? ORDER BY `time` DESC',[req.params.login],(error,rows,fields)=>
+    {
+        if (error)
+        {
+            response.status(400,error,res);
+        }
+        else
+        {
+            response.status(200,rows,res);
+        }
+    })
+}
+
+exports.getFollowing = (req,res) =>
+{
+
+    connection.query('SELECT `user_login` as `login` FROM `user_follows` WHERE `user_follower_login` = ? ORDER BY `time` DESC',[req.params.login],(error,rows,fields)=>
+    {
+        if (error)
+        {
+            response.status(400,error,res);
+        }
+        else
+        {
+            response.status(200,rows,res);
+        }
+    })
+}

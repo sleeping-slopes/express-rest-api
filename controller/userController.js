@@ -63,6 +63,26 @@ exports.getProfile = (req,res) =>
     })
 }
 
+exports.getShortProfile = (req,res) =>
+{
+    connection.query('SELECT `username`,`followers_count` FROM `view_user_profile` WHERE `login` = ?',[req.params.login],(error,rows,fields)=>
+    {
+        if (error)
+        {
+            response.status(400,error,res);
+        }
+        else if (rows.length<1)
+        {
+            response.status(404,{error: 'user not found'},res);
+        }
+        else
+        {
+            const row = rows[0];
+            response.status(200,row,res);
+        }
+    })
+}
+
 exports.getLinks = (req,res) =>
 {
     connection.query('SELECT `url`,`description` FROM `user_links` WHERE `userLogin` = ?',[req.params.login],(error,rows,fields)=>

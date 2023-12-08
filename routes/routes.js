@@ -24,6 +24,7 @@ module.exports = (app) =>
     app.route("/api/user/").get(middleware.authToken, userController.getByVerifiedJWT);
     app.route("/api/user/:login/username").get(userController.getUsername);
     app.route("/api/user/:login/profile").get(userController.getProfile);
+    app.route("/api/user/:login/shortprofile").get(userController.getShortProfile);
     app.route("/api/user/:login/picture").get(userController.getProfilePicture);
     app.route("/api/user/:login/banner").get(userController.getBanner);
     app.route("/api/user/:login/songs").get(userController.getSongs);

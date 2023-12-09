@@ -6,11 +6,19 @@ exports.authToken = (req,res,next) =>
 {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
-    if (token==null) return response.status(401,{message:"token not found"},res);
+    if (token==null)
+    {
+        req.user=null;
+        return next();
+    }
     jwt.verify(token,config.JWTSECRET,(err,user)=>
     {
-        if (err) return response.status(403,{message:"invalid token"},res);
+        if (err)
+        {
+            req.user=null;
+            return next();
+        }
         req.user=user;
-        next();
+        return next();
     });
 }

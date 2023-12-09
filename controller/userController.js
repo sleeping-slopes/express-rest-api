@@ -5,6 +5,9 @@ const connection = require('../settings/database')
 
 exports.getByVerifiedJWT = (req,res) =>
 {
+    // console.log(req.user);
+    if (!req.user) response.status(404,{message: 'User not found'},res);
+    else
     connection.query('SELECT `login` FROM `users` WHERE `login` = ?',[req.user.login],(error,rows,fields)=>
     {
         if (error)
@@ -13,7 +16,7 @@ exports.getByVerifiedJWT = (req,res) =>
         }
         else if (rows.length<1)
         {
-            response.status(404,{error: 'user not found'},res);
+            response.status(404,{message: 'User not found'},res);
         }
         else
         {
@@ -33,7 +36,7 @@ exports.getUsername = (req,res) =>
         }
         else if (rows.length<1)
         {
-            response.status(404,{error: 'user not found'},res);
+            response.status(404,{message: 'User not found'},res);
         }
         else
         {
@@ -53,11 +56,12 @@ exports.getProfile = (req,res) =>
         }
         else if (rows.length<1)
         {
-            response.status(404,{error: 'user not found'},res);
+            response.status(404,{message: 'User not found'},res);
         }
         else
         {
             const row = rows[0];
+            if (req.user && req.user.login==req.params.login) row.owner=true;
             response.status(200,row,res);
         }
     })
@@ -73,7 +77,7 @@ exports.getShortProfile = (req,res) =>
         }
         else if (rows.length<1)
         {
-            response.status(404,{error: 'user not found'},res);
+            response.status(404,{message: 'User not found'},res);
         }
         else
         {
@@ -178,7 +182,7 @@ exports.getProfilePicture = (req,res) =>
         }
         else if (rows.length<1)
         {
-            response.status(404,{error: 'user not found'},res);
+            response.status(404,{message: 'User not found'},res);
         }
         else
         {
@@ -204,7 +208,7 @@ exports.getBanner = (req,res) =>
         }
         else if (rows.length<1)
         {
-            response.status(404,{error: 'user not found'},res);
+            response.status(404,{message: 'User not found'},res);
         }
         else
         {

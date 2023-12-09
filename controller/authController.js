@@ -19,11 +19,11 @@ exports.signUp = (req,res) =>
             {
                 if (r.email==req.body.email)
                 {
-                    error.emailError = 'account with this email already exists';
+                    error.emailError = 'Account with this email already exists';
                 }
                 if (r.login==req.body.login)
                 {
-                    error.loginError = 'account with this login already exists';
+                    error.loginError = 'Account with this login already exists';
                 }
                 return true;
             });
@@ -41,7 +41,7 @@ exports.signUp = (req,res) =>
                 else
                 {
                     const token = jwt.sign({ login: req.body.login },config.JWTSECRET,{ expiresIn: 60 * 120});
-                    response.status(200,{message:'user has been successfully registered',token: "Bearer " + token,results},res);
+                    response.status(200,{token: "Bearer " + token},res);
                 }
             })
         }
@@ -58,7 +58,7 @@ exports.logIn = (req,res) =>
         }
         else if (rows.length<1)
         {
-            const error = { loginError: 'user with this login/email does not exist' };
+            const error = { loginError: 'User with this login/email does not exist' };
             response.status(401,error,res);
         }
         else
@@ -71,7 +71,7 @@ exports.logIn = (req,res) =>
             }
             else
             {
-                const error = { passwordError: 'incorrect password' };
+                const error = { passwordError: 'Incorrect password' };
                 response.status(401,error,res);
             }
         }

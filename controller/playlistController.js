@@ -26,7 +26,7 @@ exports.getByID = (req,res) =>
         }
         else if (rows.length<1)
         {
-            response.status(404,{error: 'playlist not found'},res);
+            response.status(404,{message: 'Playlist not found'},res);
         }
         else
         {
@@ -77,7 +77,7 @@ exports.getCover = (req,res) =>
         }
         else if (rows.length<1)
         {
-            response.status(404,{error: 'playlist not found'},res);
+            response.status(404,{message: 'Playlist not found'},res);
         }
         else
         {

@@ -136,6 +136,40 @@ exports.getLikedPlaylists = (req,res) =>
     })
 }
 
+exports.getPopularSongs = (req,res) =>
+{
+
+    connection.query('SELECT `songID` as `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `likes_count` DESC) AS `pos` FROM `view_song_artists` WHERE `login` = ?',[req.params.login],(error,rows,fields)=>
+    {
+
+        if (error)
+        {
+            response.status(400,error,res);
+        }
+        else
+        {
+            response.status(200,rows,res);
+        }
+    })
+}
+
+exports.getPopularPlaylists = (req,res) =>
+{
+
+    connection.query('SELECT `playlistID` as `id` FROM `view_playlist_artists` WHERE `login` = ? ORDER BY `likes_count` DESC',[req.params.login],(error,rows,fields)=>
+    {
+
+        if (error)
+        {
+            response.status(400,error,res);
+        }
+        else
+        {
+            response.status(200,rows,res);
+        }
+    })
+}
+
 exports.getSongs = (req,res) =>
 {
 

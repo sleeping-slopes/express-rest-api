@@ -14,8 +14,6 @@ module.exports = (app) =>
     app.route("/api/songs/:id/audio").get(songController.getAudio);
     app.route("/api/songs/:id/cover").get(songController.getCover);
 
-
-
     const userController = require('./../controller/userController');
     app.route("/api/user/:login/username").get(userController.getUsername);
     app.route("/api/user/:login/shortprofile").get(userController.getShortProfile);
@@ -23,6 +21,8 @@ module.exports = (app) =>
     app.route("/api/user/:login/banner").get(userController.getBanner);
     app.route("/api/user/:login/songs").get(userController.getSongs);
     app.route("/api/user/:login/playlists").get(userController.getPlaylists);
+    app.route("/api/user/:login/popular/songs").get(userController.getPopularSongs);
+    app.route("/api/user/:login/popular/playlists").get(userController.getPopularPlaylists);
     app.route("/api/user/:login/likes/songs").get(userController.getLikedSongs);
     app.route("/api/user/:login/likes/playlists").get(userController.getLikedPlaylists);
     app.route("/api/user/:login/links").get(userController.getLinks);

@@ -18,7 +18,7 @@ exports.getAll = (req,res) =>
 
 exports.getByID = (req,res) =>
 {
-    connection.query("SELECT `id`,`name` FROM `playlists` WHERE `id` = ?",[req.params.id],(error,rows,fields)=>
+    connection.query("SELECT * FROM `view_playlist` WHERE `id` = ?",[req.params.id],(error,rows,fields)=>
     {
         if (error)
         {

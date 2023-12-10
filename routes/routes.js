@@ -30,12 +30,16 @@ module.exports = (app) =>
     app.route("/api/user/:login/following").get(userController.getFollowing);
 
     const middleware = require('./../middleware/middleware');
+    app.route("/api/user/").get(middleware.authToken, userController.getByVerifiedJWT);
+
+    app.route("/api/user/:login/profile").get(middleware.authToken, userController.getProfile);
+
     app.route("/api/songs/:id").get(middleware.authToken, songController.getByID);
     app.route('/api/playlists/:id').get(middleware.authToken, playlistController.getByID);
-    app.route("/api/user/").get(middleware.authToken, userController.getByVerifiedJWT);
-    app.route("/api/user/:login/profile").get(middleware.authToken, userController.getProfile);
 
     app.route("/api/songs/:id/action/like/post").post(middleware.authToken, songController.postLike);
     app.route("/api/songs/:id/action/like/delete").post(middleware.authToken, songController.deleteLike);
-    // app.route("/api/songs/:id/action/like/delete").delete(middleware.authToken, songController.actionLike);
+
+    app.route("/api/playlists/:id/action/like/post").post(middleware.authToken, playlistController.postLike);
+    app.route("/api/playlists/:id/action/like/delete").post(middleware.authToken, playlistController.deleteLike);
 }

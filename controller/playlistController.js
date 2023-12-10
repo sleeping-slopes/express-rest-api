@@ -44,8 +44,20 @@ exports.getByID = (req,res) =>
                     {
                         row.artists.push({login:artist.login,name:artist.pseudoname?artist.pseudoname:artist.username});
                     });
-
-                    response.status(200,row,res);
+                    if (req.user)
+                        connection.query('SELECT `id` FROM `playlist_likes` WHERE `playlistID` = ? AND `userLogin` = ?',[row.id,req.user.login],(error,likes)=>
+                        {
+                            if (error)
+                            {
+                                response.status(400,error,res);
+                            }
+                            else
+                            {
+                                if (likes.length>0) row.liked = true;
+                                response.status(200,row,res);
+                            }
+                        });
+                    else response.status(200,row,res);
                 }
             })
         }
@@ -89,6 +101,38 @@ exports.getCover = (req,res) =>
                   response.status(error.status,error,res);
                 }
             });
+        }
+    })
+}
+
+exports.postLike = (req,res) =>
+{
+    const sql = 'INSERT INTO `playlist_likes`(`userLogin`,`playlistID`,`time`) VALUES (?,?,?)';
+    connection.query(sql,[req.user.login,req.params.id,new Date().toISOString().slice(0, 19).replace('T', ' ')],(error,results)=>
+    {
+        if (error)
+        {
+            response.status(400,error,res);
+        }
+        else
+        {
+            response.status(200,{message: 'Playlist liked'},res);
+        }
+    })
+}
+
+exports.deleteLike = (req,res) =>
+{
+    const sql = 'DELETE FROM `playlist_likes` WHERE`userLogin`=? AND `playlistID`=?';
+    connection.query(sql,[req.user.login,req.params.id],(error,results)=>
+    {
+        if (error)
+        {
+            response.status(400,error,res);
+        }
+        else
+        {
+            response.status(200,{message: 'Playlist disliked'},res);
         }
     })
 }

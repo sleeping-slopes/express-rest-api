@@ -26,7 +26,7 @@ exports.getByID = (req,res) =>
         }
         else if (rows.length<1)
         {
-            response.status(404,{message: 'Song not found'},res);
+            response.status(404,'Song not found',res);
         }
         else
         {
@@ -74,14 +74,14 @@ exports.getAudio = (req,res) =>
         }
         else if (rows.length<1)
         {
-            response.status(404,{message: 'Song not found'},res);
+            response.status(404,'Song not found',res);
         }
         else
         {
             const row = rows[0];
             res.sendFile("audio/"+row.audiosrc,{root: '.'}, (error)=>
             {
-                if (error) console.log(error);
+                if (error) response.status(error.status,error,res);
             });
         }
     })
@@ -97,7 +97,7 @@ exports.getCover = (req,res) =>
         }
         else if (rows.length<1)
         {
-            response.status(404,{message: 'Song not found'},res);
+            response.status(404,'Song not found',res);
         }
         else
         {
@@ -124,7 +124,7 @@ exports.postLike = (req,res) =>
         }
         else
         {
-            response.status(200,{message: 'Song liked'},res);
+            response.status(200,'Song liked',res);
         }
     })
 }
@@ -140,7 +140,7 @@ exports.deleteLike = (req,res) =>
         }
         else
         {
-            response.status(200,{message: 'Song disliked'},res);
+            response.status(200,'Song disliked',res);
         }
     })
 }

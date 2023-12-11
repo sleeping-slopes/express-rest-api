@@ -5,8 +5,7 @@ const connection = require('../settings/database')
 
 exports.getByVerifiedJWT = (req,res) =>
 {
-    // console.log(req.user);
-    if (!req.user) response.status(404,{message: 'User not found'},res);
+    if (!req.user) response.status(404,'No auth',res);
     else
     connection.query('SELECT `login` FROM `users` WHERE `login` = ?',[req.user.login],(error,rows,fields)=>
     {
@@ -16,7 +15,7 @@ exports.getByVerifiedJWT = (req,res) =>
         }
         else if (rows.length<1)
         {
-            response.status(404,{message: 'User not found'},res);
+            response.status(404,'User not found',res);
         }
         else
         {
@@ -36,7 +35,7 @@ exports.getUsername = (req,res) =>
         }
         else if (rows.length<1)
         {
-            response.status(404,{message: 'User not found'},res);
+            response.status(404,'User not found',res);
         }
         else
         {
@@ -56,7 +55,7 @@ exports.getProfile = (req,res) =>
         }
         else if (rows.length<1)
         {
-            response.status(404,{message: 'User not found'},res);
+            response.status(404,'User not found',res);
         }
         else
         {
@@ -77,7 +76,7 @@ exports.getShortProfile = (req,res) =>
         }
         else if (rows.length<1)
         {
-            response.status(404,{message: 'User not found'},res);
+            response.status(404,'User not found',res);
         }
         else
         {
@@ -216,7 +215,7 @@ exports.getProfilePicture = (req,res) =>
         }
         else if (rows.length<1)
         {
-            response.status(404,{message: 'User not found'},res);
+            response.status(404,'User not found',res);
         }
         else
         {
@@ -242,12 +241,12 @@ exports.getBanner = (req,res) =>
         }
         else if (rows.length<1)
         {
-            response.status(404,{message: 'User not found'},res);
+            response.status(404,'User not found',res);
         }
         else
         {
             const row = rows[0];
-            res.sendFile("images/user images/banner/"+row.banner,{root: '.'}, function (error)
+            res.sendFile("images/user images/banners/"+row.banner,{root: '.'}, function (error)
             {
                 if (error)
                 {

@@ -26,7 +26,7 @@ exports.getByID = (req,res) =>
         }
         else if (rows.length<1)
         {
-            response.status(404,{message: 'Playlist not found'},res);
+            response.status(404,'Playlist not found',res);
         }
         else
         {
@@ -89,7 +89,7 @@ exports.getCover = (req,res) =>
         }
         else if (rows.length<1)
         {
-            response.status(404,{message: 'Playlist not found'},res);
+            response.status(404,'Playlist not found',res);
         }
         else
         {
@@ -116,7 +116,7 @@ exports.postLike = (req,res) =>
         }
         else
         {
-            response.status(200,{message: 'Playlist liked'},res);
+            response.status(200,'Playlist liked',res);
         }
     })
 }
@@ -132,7 +132,7 @@ exports.deleteLike = (req,res) =>
         }
         else
         {
-            response.status(200,{message: 'Playlist disliked'},res);
+            response.status(200,'Playlist disliked',res);
         }
     })
 }

@@ -102,10 +102,111 @@ exports.getLinks = (req,res) =>
     })
 }
 
+exports.getAllSongs = (req,res) =>
+{
+    const sql = "SELECT `id`, ROW_NUMBER() OVER(PARTITION BY null) AS `pos` FROM(SELECT DISTINCT `id` FROM(SELECT `songID` as `id`,`time` FROM `song_likes` WHERE `userLogin` = ? UNION SELECT `songID` as `id`,`created_at` FROM `view_song_artists` WHERE `login` = ? ORDER by `time` DESC) as a) as b";
+    connection.query(sql,[req.params.login,req.params.login],(error,rows,fields)=>
+    {
+        if (error)
+        {
+            response.status(400,error,res);
+        }
+        else
+        {
+            response.status(200,rows,res);
+        }
+    })
+}
+
+exports.getCreatedSongs = (req,res) =>
+{
+
+    connection.query('SELECT `songID` as `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `created_at` DESC) AS `pos` FROM `view_song_artists` WHERE `login` = ?',[req.params.login],(error,rows,fields)=>
+    {
+
+        if (error)
+        {
+            response.status(400,error,res);
+        }
+        else
+        {
+            response.status(200,rows,res);
+        }
+    })
+}
+
+exports.getCreatedPopularSongs = (req,res) =>
+{
+
+    connection.query('SELECT `songID` as `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `likes_count` DESC) AS `pos` FROM `view_song_artists` WHERE `login` = ?',[req.params.login],(error,rows,fields)=>
+    {
+
+        if (error)
+        {
+            response.status(400,error,res);
+        }
+        else
+        {
+            response.status(200,rows,res);
+        }
+    })
+}
+
 exports.getLikedSongs = (req,res) =>
 {
 
     connection.query('SELECT `songID` as `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `song_likes`.`time` DESC) AS `pos` FROM `song_likes` WHERE `userLogin` = ?',[req.params.login],(error,rows,fields)=>
+    {
+
+        if (error)
+        {
+            response.status(400,error,res);
+        }
+        else
+        {
+            response.status(200,rows,res);
+        }
+    })
+}
+
+exports.getAllPlaylists = (req,res) =>
+{
+    const sql="SELECT DISTINCT `id` FROM(SELECT `playlistID` as `id`,`time` FROM `playlist_likes` WHERE `userLogin` = ? UNION SELECT `playlistID` as `id`,`created_at` FROM `view_playlist_artists` WHERE `login` = ? ORDER by `time` DESC) as a";
+    connection.query(sql,[req.params.login,req.params.login],(error,rows,fields)=>
+    {
+
+        if (error)
+        {
+            response.status(400,error,res);
+        }
+        else
+        {
+            response.status(200,rows,res);
+        }
+    })
+}
+
+exports.getCreatedPlaylists = (req,res) =>
+{
+
+    connection.query('SELECT `playlistID` as `id` FROM `view_playlist_artists` WHERE `login` = ? ORDER BY `created_at` DESC',[req.params.login],(error,rows,fields)=>
+    {
+
+        if (error)
+        {
+            response.status(400,error,res);
+        }
+        else
+        {
+            response.status(200,rows,res);
+        }
+    })
+}
+
+exports.getCreatedPopularPlaylists = (req,res) =>
+{
+
+    connection.query('SELECT `playlistID` as `id` FROM `view_playlist_artists` WHERE `login` = ? ORDER BY `likes_count` DESC',[req.params.login],(error,rows,fields)=>
     {
 
         if (error)
@@ -134,76 +235,6 @@ exports.getLikedPlaylists = (req,res) =>
         }
     })
 }
-
-exports.getPopularSongs = (req,res) =>
-{
-
-    connection.query('SELECT `songID` as `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `likes_count` DESC) AS `pos` FROM `view_song_artists` WHERE `login` = ?',[req.params.login],(error,rows,fields)=>
-    {
-
-        if (error)
-        {
-            response.status(400,error,res);
-        }
-        else
-        {
-            response.status(200,rows,res);
-        }
-    })
-}
-
-exports.getPopularPlaylists = (req,res) =>
-{
-
-    connection.query('SELECT `playlistID` as `id` FROM `view_playlist_artists` WHERE `login` = ? ORDER BY `likes_count` DESC',[req.params.login],(error,rows,fields)=>
-    {
-
-        if (error)
-        {
-            response.status(400,error,res);
-        }
-        else
-        {
-            response.status(200,rows,res);
-        }
-    })
-}
-
-exports.getSongs = (req,res) =>
-{
-
-    connection.query('SELECT `songID` as `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `created_at` DESC) AS `pos` FROM `view_song_artists` WHERE `login` = ?',[req.params.login],(error,rows,fields)=>
-    {
-
-        if (error)
-        {
-            response.status(400,error,res);
-        }
-        else
-        {
-            response.status(200,rows,res);
-        }
-    })
-}
-
-exports.getPlaylists = (req,res) =>
-{
-
-    connection.query('SELECT `playlistID` as `id` FROM `view_playlist_artists` WHERE `login` = ? ORDER BY `created_at` DESC',[req.params.login],(error,rows,fields)=>
-    {
-
-        if (error)
-        {
-            response.status(400,error,res);
-        }
-        else
-        {
-            response.status(200,rows,res);
-        }
-    })
-}
-
-
 
 exports.getProfilePicture = (req,res) =>
 {

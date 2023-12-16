@@ -19,12 +19,17 @@ module.exports = (app) =>
     app.route("/api/user/:login/shortprofile").get(userController.getShortProfile);
     app.route("/api/user/:login/picture").get(userController.getProfilePicture);
     app.route("/api/user/:login/banner").get(userController.getBanner);
-    app.route("/api/user/:login/songs").get(userController.getSongs);
-    app.route("/api/user/:login/playlists").get(userController.getPlaylists);
-    app.route("/api/user/:login/popular/songs").get(userController.getPopularSongs);
-    app.route("/api/user/:login/popular/playlists").get(userController.getPopularPlaylists);
-    app.route("/api/user/:login/likes/songs").get(userController.getLikedSongs);
-    app.route("/api/user/:login/likes/playlists").get(userController.getLikedPlaylists);
+
+    app.route("/api/user/:login/songs").get(userController.getAllSongs);
+    app.route("/api/user/:login/songs/created").get(userController.getCreatedSongs);
+    app.route("/api/user/:login/songs/created/popular").get(userController.getCreatedPopularSongs);
+    app.route("/api/user/:login/songs/liked").get(userController.getLikedSongs);
+
+    app.route("/api/user/:login/playlists").get(userController.getAllPlaylists);
+    app.route("/api/user/:login/playlists/created").get(userController.getCreatedPlaylists);
+    app.route("/api/user/:login/playlists/created/popular").get(userController.getCreatedPopularPlaylists);
+    app.route("/api/user/:login/playlists/liked").get(userController.getLikedPlaylists);
+
     app.route("/api/user/:login/links").get(userController.getLinks);
     app.route("/api/user/:login/followers").get(userController.getFollowers);
     app.route("/api/user/:login/following").get(userController.getFollowing);

@@ -40,7 +40,7 @@ exports.signUp = (req,res) =>
                 }
                 else
                 {
-                    const token = jwt.sign({ login: req.body.login },config.JWTSECRET,{ expiresIn: 60 * 120});
+                    const token = jwt.sign({ login: req.body.login },config.JWTSECRET);
                     response.status(200,{token: "Bearer " + token},res);
                 }
             })
@@ -66,7 +66,7 @@ exports.logIn = (req,res) =>
             const row = rows[0];
             if (row.password==req.body.password)
             {
-                const token = jwt.sign({ login: row.login },config.JWTSECRET,{ expiresIn: 60 * 120});
+                const token = jwt.sign({ login: row.login },config.JWTSECRET);
                 response.status(200,{token: "Bearer " + token},res);
             }
             else

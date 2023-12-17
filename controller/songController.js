@@ -54,10 +54,15 @@ exports.getByID = (req,res) =>
                             else
                             {
                                 if (likes.length>0) row.liked = true;
+                                else row.liked = false;
                                 response.status(200,row,res);
                             }
                         });
-                    else response.status(200,row,res);
+                    else
+                    {
+                        row.liked = false;
+                        response.status(200,row,res);
+                    }
                 }
             })
         }

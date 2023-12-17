@@ -66,7 +66,7 @@ exports.getByID = (req,res) =>
 
 exports.getSongs = (req,res) =>
 {
-    connection.query("SELECT `id`,`pos` FROM `view_playlist_songs` WHERE `playlistID` = ? ORDER BY `view_playlist_songs`.`pos`",[req.params.id],(error,rows,fields)=>
+    connection.query("SELECT `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `pos` ASC) AS `pos` FROM `view_playlist_songs` WHERE `playlistID` = ? ORDER BY `view_playlist_songs`.`pos`",[req.params.id],(error,rows,fields)=>
     {
         if (error)
         {

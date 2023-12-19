@@ -118,6 +118,36 @@ exports.getCover = (req,res) =>
     })
 }
 
+exports.getLikes = (req,res) =>
+{
+    connection.query("SELECT `userLogin` as `login` FROM `song_likes` WHERE `songID` = ? ORDER BY `time` DESC",[req.params.id],(error,rows,fields)=>
+    {
+        if (error)
+        {
+            response.status(400,error,res);
+        }
+        else
+        {
+            response.status(200,rows,res);
+        }
+    })
+}
+
+exports.getPlaylists = (req,res) =>
+{
+    connection.query("SELECT DISTINCT `playlistID` as `id` FROM `playlist_songs` WHERE `songID` = ?",[req.params.id],(error,rows,fields)=>
+    {
+        if (error)
+        {
+            response.status(400,error,res);
+        }
+        else
+        {
+            response.status(200,rows,res);
+        }
+    })
+}
+
 exports.postLike = (req,res) =>
 {
     const sql = 'INSERT INTO `song_likes`(`userLogin`,`songID`,`time`) VALUES (?,?,?)';

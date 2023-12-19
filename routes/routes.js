@@ -13,6 +13,8 @@ module.exports = (app) =>
     app.route("/api/songs").get(songController.getAll);
     app.route("/api/songs/:id/audio").get(songController.getAudio);
     app.route("/api/songs/:id/cover").get(songController.getCover);
+    app.route("/api/songs/:id/likes").get(songController.getLikes);
+    app.route("/api/songs/:id/playlists").get(songController.getPlaylists);
 
     const userController = require('./../controller/userController');
     app.route("/api/user/:login/username").get(userController.getUsername);

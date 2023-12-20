@@ -5,17 +5,17 @@ const config = require('../config');
 const connection=mysql.createConnection
 (
     {
-        host:config.HOST,
-        user:config.USER,
-        password:config.PASSWORD,
-        database:config.DATABASE
+        host:config.DB_HOST,
+        user:config.DB_USER,
+        password:config.DB_PASSWORD,
+        database:config.DB_NAME,
     }
 );
 
 connection.connect((error)=>
 {
-    if (error) return console.log("cannot connect to mysql database");
-    return console.log("successfully connected to mysql database");
+    if (error) return console.log("cannot connect to mysql database on "+config.DB_HOST);
+    return console.log("successfully connected to mysql database on "+config.DB_HOST);
 });
 
 module.exports = connection

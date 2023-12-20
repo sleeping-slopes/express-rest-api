@@ -11,7 +11,7 @@ app.use(bodyParser.json());
 const routes = require('./routes/routes');
 routes(app);
 
-app.listen(config.PORT,()=>
+app.listen(config.API_PORT,config.API_HOST,()=>
 {
-    console.log("app listen on port "+config.PORT)
+    console.log("app listen on "+config.API_HOST+":"+config.API_PORT)
 });

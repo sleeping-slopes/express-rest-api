@@ -13,12 +13,8 @@ exports.authToken = (req,res,next) =>
     }
     jwt.verify(token,config.JWTSECRET,(err,user)=>
     {
-        if (err)
-        {
-            req.user=null;
-            return next();
-        }
-        req.user=user;
+        if (err) req.user=null;
+        else req.user=user;
         return next();
     });
 }

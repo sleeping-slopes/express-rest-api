@@ -17,29 +17,31 @@ module.exports = (app) =>
     app.route("/api/songs/:id/playlists").get(songController.getPlaylists);
 
     const userController = require('./../controller/userController');
-    app.route("/api/user/:login/username").get(userController.getUsername);
-    app.route("/api/user/:login/shortprofile").get(userController.getShortProfile);
-    app.route("/api/user/:login/picture").get(userController.getProfilePicture);
-    app.route("/api/user/:login/banner").get(userController.getBanner);
+    app.route("/api/users/:login/username").get(userController.getUsername);
+    app.route("/api/users/:login/picture").get(userController.getProfilePicture);
+    app.route("/api/users/:login/banner").get(userController.getBanner);
 
-    app.route("/api/user/:login/songs").get(userController.getAllSongs);
-    app.route("/api/user/:login/songs/created").get(userController.getCreatedSongs);
-    app.route("/api/user/:login/songs/created/popular").get(userController.getCreatedPopularSongs);
-    app.route("/api/user/:login/songs/liked").get(userController.getLikedSongs);
+    app.route("/api/users/:login/songs").get(userController.getAllSongs);
+    app.route("/api/users/:login/songs/created").get(userController.getCreatedSongs);
+    app.route("/api/users/:login/songs/created/popular").get(userController.getCreatedPopularSongs);
+    app.route("/api/users/:login/songs/liked").get(userController.getLikedSongs);
 
-    app.route("/api/user/:login/playlists").get(userController.getAllPlaylists);
-    app.route("/api/user/:login/playlists/created").get(userController.getCreatedPlaylists);
-    app.route("/api/user/:login/playlists/created/popular").get(userController.getCreatedPopularPlaylists);
-    app.route("/api/user/:login/playlists/liked").get(userController.getLikedPlaylists);
+    app.route("/api/users/:login/playlists").get(userController.getAllPlaylists);
+    app.route("/api/users/:login/playlists/created").get(userController.getCreatedPlaylists);
+    app.route("/api/users/:login/playlists/created/popular").get(userController.getCreatedPopularPlaylists);
+    app.route("/api/users/:login/playlists/liked").get(userController.getLikedPlaylists);
 
-    app.route("/api/user/:login/links").get(userController.getLinks);
-    app.route("/api/user/:login/followers").get(userController.getFollowers);
-    app.route("/api/user/:login/following").get(userController.getFollowing);
+    app.route("/api/users/:login/links").get(userController.getLinks);
+    app.route("/api/users/:login/followers").get(userController.getFollowers);
+    app.route("/api/users/:login/following").get(userController.getFollowing);
 
     const middleware = require('./../middleware/middleware');
-    app.route("/api/user/").get(middleware.authToken, userController.getByVerifiedJWT);
+    app.route("/api/me/").get(middleware.authToken, userController.getByVerifiedJWT);
 
-    app.route("/api/user/:login/profile").get(middleware.authToken, userController.getProfile);
+    app.route("/api/users/:login/profile").get(middleware.authToken, userController.getProfile);
+
+    app.route("/api/users/:id/action/follow/post").post(middleware.authToken, userController.postFollow);
+    app.route("/api/users/:id/action/follow/delete").post(middleware.authToken, userController.deleteFollow);
 
     app.route("/api/songs/:id").get(middleware.authToken, songController.getByID);
     app.route('/api/playlists/:id').get(middleware.authToken, playlistController.getByID);

@@ -8,5 +8,5 @@ module.exports =
     API_HOST: "192.168.100.7",
     API_PORT: "5000",
 
-    JWTSECRET: "ABCDE"
+    JWTSECRET: "1b71e18c6c66a5ce53b735866bd57825b9bcf70d3e6af78d3eecf2f560ccf816"
 }

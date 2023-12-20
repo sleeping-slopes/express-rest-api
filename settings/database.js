@@ -14,8 +14,8 @@ const connection=mysql.createConnection
 
 connection.connect((error)=>
 {
-    if (error) return console.log("cannot connect to mysql database on "+config.DB_HOST);
-    return console.log("successfully connected to mysql database on "+config.DB_HOST);
+    if (error) return console.log("cannot connect to mysql database "+config.DB_NAME+" on "+config.DB_HOST);
+    return console.log("successfully connected to mysql database "+config.DB_NAME+" on "+config.DB_HOST);
 });
 
 module.exports = connection

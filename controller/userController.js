@@ -5,7 +5,7 @@ const connection = require('../settings/database')
 
 exports.getByVerifiedJWT = (req,res) =>
 {
-    if (!req.user) return response.status(404,'No auth',res);
+    if (!req.user) return response.status(401,'No auth',res);
     connection.query('SELECT `login` FROM `users` WHERE `login` = ?',[req.user.login],(error,rows,fields)=>
     {
         if (error) return response.status(400,error,res);

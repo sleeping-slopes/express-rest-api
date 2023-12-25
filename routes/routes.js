@@ -6,7 +6,6 @@ module.exports = (app) =>
 
     const playlistController = require('./../controller/playlistController');
     app.route('/api/playlists').get(playlistController.getAll);
-    app.route('/api/playlists/:id/songs').get(playlistController.getSongs);
     app.route('/api/playlists/:id/cover').get(playlistController.getCover);
 
     const songController = require('./../controller/songController');

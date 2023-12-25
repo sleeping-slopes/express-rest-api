@@ -18,36 +18,36 @@ exports.getByID = (req,res) =>
         if (rows.length<1) return response.status(404,'Playlist not found',res);
 
         const row = rows[0];
-        row.artists = [];
-        connection.query('SELECT `login`,`pseudoname`,`username` FROM `view_playlist_artists` WHERE `playlistID` = ? ORDER BY `view_playlist_artists`.`artistPlaylistPosition`',[row.id],(error,artists)=>
+        row.songs = [];
+        connection.query("SELECT `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `pos` ASC) AS `pos` FROM `view_playlist_songs` WHERE `playlistID` = ? ORDER BY `view_playlist_songs`.`pos`",[req.params.id],(error,songs)=>
         {
             if (error) return response.status(400,error,res);
-            artists.forEach(artist=>
+            songs.forEach(song=>
             {
-                row.artists.push({login:artist.login,name:artist.pseudoname?artist.pseudoname:artist.username});
+                row.songs.push({id:song.id,pos:song.pos});
             });
-            if (req.user)
-                connection.query('SELECT `id` FROM `playlist_likes` WHERE `playlistID` = ? AND `userLogin` = ?',[row.id,req.user.login],(error,likes)=>
-                {
-                    if (error) return response.status(400,error,res);
-                    row.liked = (likes.length>0)
-                    return response.status(200,row,res);
-                });
-            else
+            row.artists = [];
+            connection.query('SELECT `login`,`pseudoname`,`username` FROM `view_playlist_artists` WHERE `playlistID` = ? ORDER BY `view_playlist_artists`.`artistPlaylistPosition`',[req.params.id],(error,artists)=>
             {
-                row.liked = false;
-                return response.status(200,row,res);
-            }
+                if (error) return response.status(400,error,res);
+                artists.forEach(artist=>
+                {
+                    row.artists.push({login:artist.login,name:artist.pseudoname?artist.pseudoname:artist.username});
+                });
+                if (req.user)
+                    connection.query('SELECT `id` FROM `playlist_likes` WHERE `playlistID` = ? AND `userLogin` = ?',[row.id,req.user.login],(error,likes)=>
+                    {
+                        if (error) return response.status(400,error,res);
+                        row.liked = (likes.length>0)
+                        return response.status(200,row,res);
+                    });
+                else
+                {
+                    row.liked = false;
+                    return response.status(200,row,res);
+                }
+            })
         })
-    })
-}
-
-exports.getSongs = (req,res) =>
-{
-    connection.query("SELECT `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `pos` ASC) AS `pos` FROM `view_playlist_songs` WHERE `playlistID` = ? ORDER BY `view_playlist_songs`.`pos`",[req.params.id],(error,rows,fields)=>
-    {
-        if (error) return response.status(400,error,res);
-        return response.status(200,rows,res);
     })
 }
 

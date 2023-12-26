@@ -15,21 +15,25 @@ exports.getByID = (req,res) =>
     connection.query("SELECT * FROM `view_playlist` WHERE `id` = ?",[req.params.id],(error,rows,fields)=>
     {
         if (error) return response.status(400,error,res);
-        if (rows.length<1) return response.status(404,'Playlist not found',res);
+        if (rows.length<1) return response.status(404,'API Playlist not found',res);
 
         const row = rows[0];
-        row.songs = [];
         connection.query("SELECT `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `pos` ASC) AS `pos` FROM `view_playlist_songs` WHERE `playlistID` = ? ORDER BY `view_playlist_songs`.`pos`",[req.params.id],(error,songs)=>
         {
             if (error) return response.status(400,error,res);
-            songs.forEach(song=>
+            if (songs.length<1) row.songs = {error:{status:"404", message:"API Empty playlist"}};
+            else
             {
-                row.songs.push({id:song.id,pos:song.pos});
-            });
-            row.artists = [];
+                row.songs = {id:req.params.id,songs:[]};
+                songs.forEach(song=>
+                {
+                    row.songs.songs.push({id:song.id,pos:song.pos});
+                });
+            }
             connection.query('SELECT `login`,`pseudoname`,`username` FROM `view_playlist_artists` WHERE `playlistID` = ? ORDER BY `view_playlist_artists`.`artistPlaylistPosition`',[req.params.id],(error,artists)=>
             {
                 if (error) return response.status(400,error,res);
+                row.artists = [];
                 artists.forEach(artist=>
                 {
                     row.artists.push({login:artist.login,name:artist.pseudoname?artist.pseudoname:artist.username});

@@ -6,7 +6,8 @@ exports.getAll = (req,res) =>
     connection.query("SELECT `id`,ROW_NUMBER() OVER(PARTITION BY null ORDER BY `songs`.`created_at` DESC) AS `pos` FROM `songs`",(error,rows,fields)=>
     {
         if (error) return response.status(400,error,res);
-        return response.status(200,rows,res);
+        if (rows.length<1) return response.status(404,'API Songs not found',res);
+        return response.status(200,{id:'API GET ALL',songs:rows},res);
     })
 }
 

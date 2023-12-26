@@ -69,7 +69,8 @@ exports.getAllSongs = (req,res) =>
     connection.query(sql,[req.params.login,req.params.login],(error,rows,fields)=>
     {
         if (error) return response.status(400,error,res);
-        return response.status(200,rows,res);
+        if (rows.length<1) return response.status(404,'No All songs',res);
+        return response.status(200,{id:'API '+req.params.login+" ALL",songs:rows},res);
     })
 }
 
@@ -79,27 +80,28 @@ exports.getCreatedSongs = (req,res) =>
     connection.query('SELECT `songID` as `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `created_at` DESC) AS `pos` FROM `view_song_artists` WHERE `login` = ?',[req.params.login],(error,rows,fields)=>
     {
         if (error) return response.status(400,error,res);
-        return response.status(200,rows,res);
+        if (rows.length<1) return response.status(404,'No created songs',res);
+        return response.status(200,{id:'API '+req.params.login+" created",songs:rows},res);
     })
 }
 
 exports.getCreatedPopularSongs = (req,res) =>
 {
-
     connection.query('SELECT `songID` as `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `likes_count` DESC) AS `pos` FROM `view_song_artists` WHERE `login` = ?',[req.params.login],(error,rows,fields)=>
     {
         if (error) return response.status(400,error,res);
-        return response.status(200,rows,res);
+        if (rows.length<1) return response.status(404,'No created popular songs',res);
+        return response.status(200,{id:'API '+req.params.login+" created popular",songs:rows},res);
     })
 }
 
 exports.getLikedSongs = (req,res) =>
 {
-
     connection.query('SELECT `songID` as `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `song_likes`.`time` DESC) AS `pos` FROM `song_likes` WHERE `userLogin` = ?',[req.params.login],(error,rows,fields)=>
     {
         if (error) return response.status(400,error,res);
-        return response.status(200,rows,res);
+        if (rows.length<1) return response.status(404,'No liked songs',res);
+        return response.status(200,{id:'API '+req.params.login+" liked",songs:rows},res);
     })
 }
 

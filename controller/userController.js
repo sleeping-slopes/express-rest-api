@@ -69,7 +69,7 @@ exports.getAllSongs = (req,res) =>
     connection.query(sql,[req.params.login,req.params.login],(error,rows,fields)=>
     {
         if (error) return response.status(400,error,res);
-        if (rows.length<1) return response.status(404,'No All songs',res);
+        if (rows.length<1) return response.status(404,'API No All songs',res);
         return response.status(200,{id:'API '+req.params.login+" ALL",songs:rows},res);
     })
 }
@@ -80,7 +80,7 @@ exports.getCreatedSongs = (req,res) =>
     connection.query('SELECT `songID` as `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `created_at` DESC) AS `pos` FROM `view_song_artists` WHERE `login` = ?',[req.params.login],(error,rows,fields)=>
     {
         if (error) return response.status(400,error,res);
-        if (rows.length<1) return response.status(404,'No created songs',res);
+        if (rows.length<1) return response.status(404,'API No created songs',res);
         return response.status(200,{id:'API '+req.params.login+" created",songs:rows},res);
     })
 }
@@ -90,7 +90,7 @@ exports.getCreatedPopularSongs = (req,res) =>
     connection.query('SELECT `songID` as `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `likes_count` DESC) AS `pos` FROM `view_song_artists` WHERE `login` = ?',[req.params.login],(error,rows,fields)=>
     {
         if (error) return response.status(400,error,res);
-        if (rows.length<1) return response.status(404,'No created popular songs',res);
+        if (rows.length<1) return response.status(404,'API No created popular songs',res);
         return response.status(200,{id:'API '+req.params.login+" created popular",songs:rows},res);
     })
 }
@@ -100,7 +100,7 @@ exports.getLikedSongs = (req,res) =>
     connection.query('SELECT `songID` as `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `song_likes`.`time` DESC) AS `pos` FROM `song_likes` WHERE `userLogin` = ?',[req.params.login],(error,rows,fields)=>
     {
         if (error) return response.status(400,error,res);
-        if (rows.length<1) return response.status(404,'No liked songs',res);
+        if (rows.length<1) return response.status(404,'API No liked songs',res);
         return response.status(200,{id:'API '+req.params.login+" liked",songs:rows},res);
     })
 }
@@ -111,6 +111,7 @@ exports.getAllPlaylists = (req,res) =>
     connection.query(sql,[req.params.login,req.params.login],(error,rows,fields)=>
     {
         if (error) return response.status(400,error,res);
+        if (rows.length<1) return response.status(404,'API No all playlists',res);
         return response.status(200,rows,res);
     })
 }
@@ -121,6 +122,7 @@ exports.getCreatedPlaylists = (req,res) =>
     connection.query('SELECT `playlistID` as `id` FROM `view_playlist_artists` WHERE `login` = ? ORDER BY `created_at` DESC',[req.params.login],(error,rows,fields)=>
     {
         if (error) return response.status(400,error,res);
+        if (rows.length<1) return response.status(404,'API No created playlists',res);
         return response.status(200,rows,res);
     })
 }
@@ -131,6 +133,7 @@ exports.getCreatedPopularPlaylists = (req,res) =>
     connection.query('SELECT `playlistID` as `id` FROM `view_playlist_artists` WHERE `login` = ? ORDER BY `likes_count` DESC',[req.params.login],(error,rows,fields)=>
     {
         if (error) return response.status(400,error,res);
+        if (rows.length<1) return response.status(404,'API No created popular playlists',res);
         return response.status(200,rows,res);
     })
 }
@@ -140,6 +143,7 @@ exports.getLikedPlaylists = (req,res) =>
     connection.query('SELECT `playlistID` as `id` FROM `playlist_likes` WHERE `userLogin` = ? ORDER BY `playlist_likes`.`time` DESC',[req.params.login],(error,rows,fields)=>
     {
         if (error) return response.status(400,error,res);
+        if (rows.length<1) return response.status(404,'API No liked playlists',res);
         return response.status(200,rows,res);
     })
 }

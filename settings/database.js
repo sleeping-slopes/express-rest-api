@@ -18,4 +18,16 @@ connection.connect((error)=>
     return console.log("successfully connected to mysql database "+config.DB_NAME+" on "+config.DB_HOST);
 });
 
-module.exports = connection
+function queryPromise(query, params)
+{
+    return new Promise((resolve, reject) =>
+    {
+        connection.query(query, params, (err, result, fields) =>
+        {
+            if (err) reject(err);
+            resolve(result);
+        });
+    })
+}
+
+module.exports = queryPromise

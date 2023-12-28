@@ -1,13 +1,13 @@
 const response = require('../response')
-const connection = require('../settings/database')
+const queryPromise = require('../settings/database')
 const jwt = require('jsonwebtoken')
 const config = require('../config')
 
-exports.signUp = (req,res) =>
+exports.signUp = async (req,res) =>
 {
-    connection.query("SELECT `login`,`email` FROM `users` WHERE `email` =  ? OR `login` = ?", [req.body.email,req.body.login],(error,rows,fields)=>
+    try
     {
-        if (error) return response.status(400,error,res);
+        const rows = await queryPromise("SELECT `login`,`email` FROM `users` WHERE `email` =  ? OR `login` = ?", [req.body.email,req.body.login]);
         if (rows.length>0)
         {
             const error = {};
@@ -21,21 +21,22 @@ exports.signUp = (req,res) =>
             return response.status(409,error,res);
         }
         const sql = 'INSERT INTO `users`(`login`,`email`,`password`) VALUES (?,?,?)';
-        connection.query(sql,[req.body.login,req.body.email,req.body.password],(error,results)=>
-        {
-            if (error) return response.status(400,error,res);
-
-            const token = jwt.sign({ login: req.body.login },config.JWTSECRET);
-            return response.status(201,{token: "Bearer " + token},res);
-        })
-    })
+        await queryPromise(sql, [req.body.login,req.body.email,req.body.password]);
+        const token = jwt.sign({ login: req.body.login },config.JWTSECRET);
+        return response.status(201,{token: "Bearer " + token},res);
+    }
+    catch(error)
+    {
+        return response.status(400,error.message,res);
+    }
 }
 
-exports.logIn = (req,res) =>
+exports.logIn = async (req,res) =>
 {
-    connection.query("SELECT * FROM `users` WHERE (`login` = ? OR `email` = ?)", [req.body.login,req.body.email],(error,rows,fields)=>
+    try
     {
-        if (error) return response.status(400,error,res);
+        const rows = await queryPromise("SELECT * FROM `users` WHERE (`login` = ? OR `email` = ?)", [req.body.login,req.body.login]);
+
         if (rows.length<1)
         {
             const error = { loginError: 'User with this login/email does not exist' };
@@ -49,5 +50,9 @@ exports.logIn = (req,res) =>
         }
         const token = jwt.sign({ login: row.login },config.JWTSECRET);
         return response.status(201,{token: "Bearer " + token},res);
-    })
+    }
+    catch(error)
+    {
+        return response.status(400,error.message,res);
+    }
 }

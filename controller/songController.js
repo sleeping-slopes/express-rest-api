@@ -1,111 +1,135 @@
 const response = require('./../response')
-const connection = require('../settings/database')
+const queryPromise = require('../settings/database')
 
-exports.getAll = (req,res) =>
+exports.getAll = async (req,res) =>
 {
-    connection.query("SELECT `id`,ROW_NUMBER() OVER(PARTITION BY null ORDER BY `songs`.`created_at` DESC) AS `pos` FROM `songs`",(error,rows,fields)=>
+    try
     {
-        if (error) return response.status(400,error,res);
+        const rows = await queryPromise("SELECT `id`,ROW_NUMBER() OVER(PARTITION BY null ORDER BY `songs`.`created_at` DESC) AS `pos` FROM `songs`");
         if (rows.length<1) return response.status(404,'API Songs not found',res);
         return response.status(200,{id:'API GET ALL',songs:rows},res);
-    })
+    }
+    catch(error)
+    {
+        return response.status(400,error.message,res);
+    }
 }
 
-exports.getByID = (req,res) =>
+exports.getByID = async (req,res) =>
 {
-    connection.query("SELECT * FROM `view_song` WHERE `id` = ?",[req.params.id],(error,rows,fields)=>
+    try
     {
-        if (error) return response.status(400,error,res);
-        if (rows.length<1) return response.status(404,'Song not found',res);
+        const rows = await queryPromise("SELECT * FROM `view_song` WHERE `id` = ?",[req.params.id]);
+        if (rows.length<1) return response.status(404,'API: Song not found',res);
         const row = rows[0];
         row.artists = [];
-        connection.query('SELECT `login`,`username`,`pseudoname` FROM `view_song_artists` WHERE `songID` = ? ORDER BY `view_song_artists`.`artistSongPosition`',[row.id],(error,artists)=>
+        const artists = await queryPromise('SELECT `login`,`username`,`pseudoname` FROM `view_song_artists` WHERE `songID` = ? ORDER BY `view_song_artists`.`artistSongPosition`',[req.params.id]);
+        artists.forEach(artist=>
         {
-            if (error) return response.status(400,error,res);
-            artists.forEach(artist=>
-            {
-                row.artists.push({login:artist.login,name:artist.pseudoname || artist.username || artist.login});
-            });
-            if (req.user)
-                connection.query('SELECT `id` FROM `song_likes` WHERE `songID` = ? AND `userLogin` = ?',[row.id,req.user.login],(error,likes)=>
-                {
-                    if (error) return response.status(400,error,res);
-                    row.liked = (likes.length>0);
-                    return response.status(200,row,res);
-                });
-            else
-            {
-                row.liked = false;
-                return response.status(200,row,res);
-            }
-        })
-    })
+            row.artists.push({login:artist.login,name:artist.pseudoname || artist.username || artist.login});
+        });
+        if (req.user)
+        {
+            const likes = await queryPromise('SELECT `id` FROM `song_likes` WHERE `songID` = ? AND `userLogin` = ?',[req.params.id,req.user.login]);
+            row.liked = (likes.length>0);
+        }
+        else row.liked = false;
+        return response.status(200,row,res);
+    }
+    catch(error)
+    {
+        return response.status(400,error.message,res);
+    }
 }
 
-exports.getAudio = (req,res) =>
+exports.getAudio = async (req,res) =>
 {
-    connection.query("SELECT `audiosrc` FROM `songs` WHERE `id` = ?",[req.params.id],(error,rows,fields)=>
+    try
     {
-        if (error) return response.status(400,error,res);
-        if (rows.length<1) return response.status(404,'Song not found',res);
+        const rows = await queryPromise("SELECT `audiosrc` FROM `songs` WHERE `id` = ?",[req.params.id]);
+        if (rows.length<1) return response.status(404,'API: Song not found',res);
         const row = rows[0];
         res.sendFile("audio/"+row.audiosrc,{root: '.'}, (error)=>
         {
             if (error) return response.status(error.status,error,res);
         });
-    })
+    }
+    catch(error)
+    {
+        return response.status(400,error.message,res);
+    }
 }
 
-exports.getCover = (req,res) =>
+exports.getCover = async (req,res) =>
 {
-    connection.query("SELECT `coversrc` FROM `songs` WHERE `id` = ?",[req.params.id],(error,rows,fields)=>
+    try
     {
-        if (error) return response.status(400,error,res);
-        if (rows.length<1) return response.status(404,'Song not found',res);
+        const rows = await queryPromise("SELECT `coversrc` FROM `songs` WHERE `id` = ?",[req.params.id]);
+        if (rows.length<1) return response.status(404,'API: Song not found',res);
         const row = rows[0];
         res.sendFile("images/covers/"+row.coversrc,{root: '.'}, function (error)
         {
             if (error) return response.status(error.status,error,res);
         });
-    })
+    }
+    catch(error)
+    {
+        return response.status(400,error.message,res);
+    }
 }
 
-exports.getLikes = (req,res) =>
+exports.getLikes = async (req,res) =>
 {
-    connection.query("SELECT `userLogin` as `login` FROM `song_likes` WHERE `songID` = ? ORDER BY `time` DESC",[req.params.id],(error,rows,fields)=>
+    try
     {
-        if (error) return response.status(400,error,res);
+        const rows = await queryPromise("SELECT `userLogin` as `login` FROM `song_likes` WHERE `songID` = ? ORDER BY `time` DESC",[req.params.id]);
         return response.status(200,rows,res);
-    })
+    }
+    catch(error)
+    {
+        return response.status(400,error.message,res);
+    }
 }
 
-exports.getPlaylists = (req,res) =>
+exports.getPlaylists = async (req,res) =>
 {
-    connection.query("SELECT DISTINCT `playlistID` as `id` FROM `playlist_songs` WHERE `songID` = ?",[req.params.id],(error,rows,fields)=>
+    try
     {
-        if (error) return response.status(400,error,res);
+        const rows = await queryPromise("SELECT DISTINCT `playlistID` as `id` FROM `playlist_songs` WHERE `songID` = ?",[req.params.id]);
         return response.status(200,rows,res);
-    })
+    }
+    catch(error)
+    {
+        return response.status(400,error.message,res);
+    }
 }
 
-exports.postLike = (req,res) =>
+exports.postLike = async (req,res) =>
 {
-    if (!req.user?.login) return response.status(401,"no auth",res);
-    const sql = 'INSERT INTO `song_likes`(`userLogin`,`songID`,`time`) VALUES (?,?,?)';
-    connection.query(sql,[req.user.login,req.params.id,new Date().toISOString().slice(0, 19).replace('T', ' ')],(error,results)=>
+    try
     {
-        if (error) return response.status(400,error,res);
-        return response.status(201,'Song liked',res);
-    })
+        if (!req.user?.login) return response.status(401,"API: No auth",res);
+        const sql = 'INSERT INTO `song_likes`(`userLogin`,`songID`,`time`) VALUES (?,?,?)';
+        await queryPromise(sql,[req.user.login,req.params.id,new Date().toISOString().slice(0, 19).replace('T', ' ')]);
+        return response.status(201,'API: Song liked',res);
+    }
+    catch(error)
+    {
+        return response.status(400,error.message,res);
+    }
 }
 
-exports.deleteLike = (req,res) =>
+exports.deleteLike = async (req,res) =>
 {
-    if (!req.user?.login) return response.status(401,"no auth",res);
-    const sql = 'DELETE FROM `song_likes` WHERE`userLogin`=? AND `songID`=?';
-    connection.query(sql,[req.user.login,req.params.id],(error,results)=>
+    try
     {
-        if (error) return response.status(400,error,res);
-        return response.status(201,'Song disliked',res);
-    })
+        if (!req.user?.login) return response.status(401,"API: No auth",res);
+        const sql = 'DELETE FROM `song_likes` WHERE`userLogin`=? AND `songID`=?';
+        await queryPromise(sql,[req.user.login,req.params.id]);
+        return response.status(201,'API: Song disliked',res);
+    }
+    catch(error)
+    {
+        return response.status(400,error.message,res);
+    }
 }

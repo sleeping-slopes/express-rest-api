@@ -5,7 +5,7 @@ exports.getAll = async (req,res) =>
 {
     try
     {
-        const rows = await queryPromise("SELECT `id`,ROW_NUMBER() OVER(PARTITION BY null ORDER BY `songs`.`created_at` DESC) AS `pos` FROM `songs`");
+        const rows = await queryPromise("SELECT `id`,ROW_NUMBER() OVER(PARTITION BY null ORDER BY `songs`.`created_at` DESC) - 1 AS `pos` FROM `songs`");
         if (rows.length<1) return response.status(404,'API Songs not found',res);
         return response.status(200,{id:'API GET ALL',songs:rows},res);
     }

@@ -21,7 +21,7 @@ exports.getByID = async (req,res) =>
         const rows = await queryPromise("SELECT * FROM `view_playlist` WHERE `id` = ?",[req.params.id]);
         if (rows.length<1) return response.status(404,'API Playlist not found',res);
         const row = rows[0];
-        const songs = await queryPromise("SELECT `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `pos` ASC) AS `pos` FROM `view_playlist_songs` WHERE `playlistID` = ? ORDER BY `view_playlist_songs`.`pos`",[req.params.id]);
+        const songs = await queryPromise("SELECT `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `pos` ASC) - 1 AS `pos` FROM `view_playlist_songs` WHERE `playlistID` = ? ORDER BY `view_playlist_songs`.`pos`",[req.params.id]);
         if (songs.length<1) row.songs = {error:{status:"404", message:"API Empty playlist"}};
         else
         {

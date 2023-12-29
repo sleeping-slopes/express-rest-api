@@ -21,6 +21,7 @@ exports.getByID = async (req,res) =>
         const rows = await queryPromise("SELECT * FROM `view_playlist` WHERE `id` = ?",[req.params.id]);
         if (rows.length<1) return response.status(404,'API Playlist not found',res);
         const row = rows[0];
+        if (!row.name) row.name = "Unnamed playlist";
         const songs = await queryPromise("SELECT `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `pos` ASC) - 1 AS `pos` FROM `view_playlist_songs` WHERE `playlistID` = ? ORDER BY `view_playlist_songs`.`pos`",[req.params.id]);
         if (songs.length<1) row.songs = {error:{status:"404", message:"API Empty playlist"}};
         else
@@ -33,10 +34,14 @@ exports.getByID = async (req,res) =>
         }
         const artists = await queryPromise('SELECT `login`,`pseudoname`,`username` FROM `view_playlist_artists` WHERE `playlistID` = ? ORDER BY `view_playlist_artists`.`artistPlaylistPosition`',[req.params.id]);
         row.artists = [];
-        artists.forEach(artist=>
+        if (artists.length<1) { row.artists.push({name:"Unknown artist"}); }
+        else
         {
-            row.artists.push({login:artist.login,name:artist.pseudoname || artist.username || artist.login});
-        });
+            artists.forEach(artist=>
+            {
+                row.artists.push({login:artist.login,name:artist.pseudoname || artist.username || artist.login});
+            });
+        }
         if (req.user)
         {
             const likes = await queryPromise('SELECT `id` FROM `playlist_likes` WHERE `playlistID` = ? AND `userLogin` = ?',[row.id,req.user.login]);

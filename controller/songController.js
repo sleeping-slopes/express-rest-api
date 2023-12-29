@@ -22,12 +22,17 @@ exports.getByID = async (req,res) =>
         const rows = await queryPromise("SELECT * FROM `view_song` WHERE `id` = ?",[req.params.id]);
         if (rows.length<1) return response.status(404,'API: Song not found',res);
         const row = rows[0];
+        if (!row.name) row.name = "Unnamed song";
         row.artists = [];
         const artists = await queryPromise('SELECT `login`,`username`,`pseudoname` FROM `view_song_artists` WHERE `songID` = ? ORDER BY `view_song_artists`.`artistSongPosition`',[req.params.id]);
-        artists.forEach(artist=>
+        if (artists.length<1) { row.artists.push({name:"Unknown artist"}); }
+        else
         {
-            row.artists.push({login:artist.login,name:artist.pseudoname || artist.username || artist.login});
-        });
+            artists.forEach(artist=>
+            {
+                row.artists.push({login:artist.login,name:artist.pseudoname || artist.username || artist.login});
+            });
+        }
         if (req.user)
         {
             const likes = await queryPromise('SELECT `id` FROM `song_likes` WHERE `songID` = ? AND `userLogin` = ?',[req.params.id,req.user.login]);

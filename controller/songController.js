@@ -109,6 +109,18 @@ exports.getPlaylists = async (req,res) =>
     }
 }
 
+exports.getRelated = async (req,res) =>
+{
+    try
+    {
+        return response.status(400,"API: WIP",res);
+    }
+    catch(error)
+    {
+        return response.status(400,error.message,res);
+    }
+}
+
 exports.postLike = async (req,res) =>
 {
     try

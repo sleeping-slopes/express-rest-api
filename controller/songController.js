@@ -113,7 +113,7 @@ exports.getRelated = async (req,res) =>
 {
     try
     {
-        return response.status(400,"API: WIP",res);
+        return response.status(400,"API: RELATED SONGS WIP",res);
     }
     catch(error)
     {

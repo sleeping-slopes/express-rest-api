@@ -33,6 +33,8 @@ exports.getByID = async (req,res) =>
                 row.artists.push({login:artist.login,name:artist.pseudoname || artist.username || artist.login});
             });
         }
+        const tags = await queryPromise('SELECT `tag` FROM `song_tags` WHERE `songID` = ?',[req.params.id]);
+        row.tags = tags;
         if (req.user)
         {
             const likes = await queryPromise('SELECT `id` FROM `song_likes` WHERE `songID` = ? AND `userLogin` = ?',[req.params.id,req.user.login]);

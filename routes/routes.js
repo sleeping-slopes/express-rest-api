@@ -16,6 +16,9 @@ module.exports = (app) =>
     app.route("/api/songs/:id/playlists").get(songController.getPlaylists);
     app.route("/api/songs/:id/related").get(songController.getRelated);
 
+    app.route("/api/tags/:tag/popular").get(songController.getTaggedPopular);
+    app.route("/api/tags/:tag/new").get(songController.getTaggedNew);
+
     const userController = require('./../controller/userController');
     app.route("/api/users/:login/username").get(userController.getUsername);
     app.route("/api/users/:login/picture").get(userController.getProfilePicture);

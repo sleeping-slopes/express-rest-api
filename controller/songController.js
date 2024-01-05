@@ -115,7 +115,40 @@ exports.getRelated = async (req,res) =>
 {
     try
     {
-        return response.status(400,"API: RELATED SONGS WIP",res);
+        const sql ="SELECT `songs`.`id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY count(`songs`.`id`) DESC) - 1 AS `pos` from `songs` INNER JOIN `song_tags` on `song_tags`.`songID` = `songs`.`id` WHERE `song_tags`.`tag` in (SELECT `tag` FROM `song_tags` WHERE `song_tags`.`songID`=?) AND `songs`.`id`!=? GROUP BY (`songs`.`id`)";
+        const rows = await queryPromise(sql,[req.params.id,req.params.id]);
+        if (rows.length<1) return response.status(404,'API Songs not found',res);
+        return response.status(200,{id:'API GET RELATED '+req.params.id,songs:rows},res);
+    }
+    catch(error)
+    {
+        return response.status(400,error.message,res);
+    }
+}
+
+exports.getTaggedPopular = async (req,res) =>
+{
+    try
+    {
+        const sql = "SELECT `view_song`.`id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `view_song`.`likes_count` DESC) - 1 AS `pos` FROM `song_tags` INNER JOIN `view_song` on `song_tags`.`songID` = `view_song`.`id` WHERE `song_tags`.`tag` = ?";
+        const rows = await queryPromise(sql,[req.params.tag]);
+        if (rows.length<1) return response.status(404,'API Songs not found',res);
+        return response.status(200,{id:'API TAGGED '+req.params.tag+' POPULAR',songs:rows},res);
+    }
+    catch(error)
+    {
+        return response.status(400,error.message,res);
+    }
+}
+
+exports.getTaggedNew = async (req,res) =>
+{
+    try
+    {
+        const sql = "SELECT `view_song`.`id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `view_song`.`created_at` DESC) - 1 AS `pos` FROM `song_tags` INNER JOIN `view_song` on `song_tags`.`songID` = `view_song`.`id` WHERE `song_tags`.`tag` = ?";
+        const rows = await queryPromise(sql,[req.params.tag]);
+        if (rows.length<1) return response.status(404,'API Songs not found',res);
+        return response.status(200,{id:'API TAGGED '+req.params.tag+' NEW',songs:rows},res);
     }
     catch(error)
     {

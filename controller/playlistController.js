@@ -23,13 +23,13 @@ exports.getByID = async (req,res) =>
         const row = rows[0];
         if (!row.name) row.name = "Unnamed playlist";
         const songs = await queryPromise("SELECT `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `pos` ASC) - 1 AS `pos` FROM `view_playlist_songs` WHERE `playlistID` = ? ORDER BY `view_playlist_songs`.`pos`",[req.params.id]);
-        if (songs.length<1) row.songs = {error:{status:"404", message:"API Empty playlist"}};
+        if (songs.length<1) row.songList = {error:{status:"404", message:"API Empty playlist"}};
         else
         {
-            row.songs = {id:req.params.id,songs:[]};
+            row.songList = {id:req.params.id,songs:[]};
             songs.forEach(song=>
             {
-                row.songs.songs.push({id:song.id,pos:song.pos});
+                row.songList.songs.push({id:song.id,pos:song.pos});
             });
         }
         const artists = await queryPromise('SELECT `login`,`pseudoname`,`username` FROM `view_playlist_artists` WHERE `playlistID` = ? ORDER BY `view_playlist_artists`.`artistPlaylistPosition`',[req.params.id]);

@@ -103,6 +103,7 @@ exports.getPlaylists = async (req,res) =>
     try
     {
         const rows = await queryPromise("SELECT DISTINCT `playlistID` as `id` FROM `playlist_songs` WHERE `songID` = ?",[req.params.id]);
+        if (rows.length<1) return response.status(404,'API: Playlists not found',res);
         return response.status(200,rows,res);
     }
     catch(error)

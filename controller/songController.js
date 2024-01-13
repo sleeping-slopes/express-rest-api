@@ -90,6 +90,7 @@ exports.getLikes = async (req,res) =>
     try
     {
         const rows = await queryPromise("SELECT `userLogin` as `login` FROM `song_likes` WHERE `songID` = ? ORDER BY `time` DESC",[req.params.id]);
+        if (rows.length<1) return response.status(404,'API: No likes',res);
         return response.status(200,rows,res);
     }
     catch(error)

@@ -79,10 +79,10 @@ exports.getAllSongs = async (req,res) =>
 {
     try
     {
-    const sql = "SELECT `id`, ROW_NUMBER() OVER(PARTITION BY null) - 1 AS `pos` FROM(SELECT DISTINCT `id` FROM(SELECT `songID` as `id`,`time` FROM `song_likes` WHERE `userLogin` = ? UNION SELECT `songID` as `id`,`created_at` FROM `view_song_artists` WHERE `login` = ? ORDER by `time` DESC) as a) as b";
-    const rows = await queryPromise(sql,[req.params.login,req.params.login]);
-    if (rows.length<1) return response.status(404,'API: No All songs',res);
-    return response.status(200,{id:'API '+req.params.login+" ALL",songs:rows},res);
+        const sql = "SELECT `id`, ROW_NUMBER() OVER(PARTITION BY null) - 1 AS `pos` FROM(SELECT DISTINCT `id` FROM(SELECT `songID` as `id`,`time` FROM `song_likes` WHERE `userLogin` = ? UNION SELECT `songID` as `id`,`created_at` FROM `view_song_artists` WHERE `login` = ? ORDER by `time` DESC) as a) as b";
+        const rows = await queryPromise(sql,[req.params.login,req.params.login]);
+        if (rows.length<1) return response.status(404,'API: No All songs',res);
+        return response.status(200,{id:'API '+req.params.login+" ALL",songs:rows},res);
     }
     catch(error)
     {

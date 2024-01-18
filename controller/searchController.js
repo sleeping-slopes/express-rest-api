@@ -47,3 +47,8 @@ exports.getUsers = async (req,res) =>
         return response.status(400,error.message,res);
     }
 }
+
+exports.getError = async (req,res) =>
+{
+    return response.status(418,'I`m a teapot :)',res);
+}

@@ -43,6 +43,8 @@ module.exports = (app) =>
     app.route("/api/search/:q/playlists").get(searchController.getPlaylists);
     app.route("/api/search/:q/users").get(searchController.getUsers);
 
+    app.route("/api/error").get(searchController.getError);
+
     const middleware = require('./../middleware/middleware');
     app.route("/api/me/").get(middleware.authToken, userController.getByVerifiedJWT);
 

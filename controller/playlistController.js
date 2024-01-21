@@ -6,6 +6,7 @@ exports.getAll = async (req,res) =>
     try
     {
         const rows = await queryPromise("SELECT `id` FROM `playlists` ORDER BY `playlists`.`created_at` DESC");
+        if (rows.length<1) return response.status(404,'API Playlists not found',res);
         return response.status(200,rows,res);
     }
     catch(error)

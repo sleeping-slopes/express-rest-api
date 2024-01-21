@@ -232,6 +232,7 @@ exports.getFollowers = async (req,res) =>
     try
     {
         const rows = await queryPromise("SELECT `user_follower_login` as `login` FROM `user_follows` WHERE `user_login` = ? ORDER BY `time` DESC",[req.params.login]);
+        if (rows.length<1) return response.status(404,'API: No followers',res);
         return response.status(200,rows,res);
     }
     catch(error)
@@ -245,6 +246,7 @@ exports.getFollowing = async (req,res) =>
     try
     {
         const rows = await queryPromise("SELECT `user_login` as `login` FROM `user_follows` WHERE `user_follower_login` = ? ORDER BY `time` DESC",[req.params.login]);
+        if (rows.length<1) return response.status(404,'API: No follows',res);
         return response.status(200,rows,res);
     }
     catch(error)

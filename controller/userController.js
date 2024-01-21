@@ -26,6 +26,7 @@ exports.getUsername = async (req,res) =>
         const rows = await queryPromise('SELECT `username` FROM `users` WHERE `login` = ?',[req.params.login]);
         if (rows.length<1) return response.status(404,'API: User not found',res);
         const row = rows[0];
+        if (!rows[0].username) rows[0].username = req.params.login;
         return response.status(200,row,res);
     }
     catch(error)
@@ -41,6 +42,7 @@ exports.getProfile = async (req,res) =>
         const rows = await queryPromise('SELECT * FROM `view_user_profile` WHERE `login` = ?',[req.params.login]);
         if (rows.length<1) return response.status(404,'API: User not found',res);
         const row = rows[0];
+        if (!rows[0].username) rows[0].username = req.params.login;
         if (req.user)
         {
             if (req.user.login==req.params.login) row.me=true;

@@ -201,7 +201,7 @@ exports.getProfilePicture = async (req,res) =>
 
         res.sendFile("images/user images/profile pictures/"+row.profile_picture,{root: '.'}, function (error)
         {
-            if (error) return response.status(error.status,error,res);
+            if (error) return response.status(404,'API: User profile picture file not found',res);
         });
     }
     catch(error)
@@ -220,7 +220,7 @@ exports.getBanner = async (req,res) =>
 
         res.sendFile("images/user images/banners/"+row.banner,{root: '.'}, function (error)
         {
-            if (error) return response.status(error.status,error,res);
+            if (error) return response.status(404,'API: User banner picture file not found',res);
         });
     }
     catch(error)

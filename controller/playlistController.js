@@ -6,7 +6,7 @@ exports.getAll = async (req,res) =>
     try
     {
         const rows = await queryPromise("SELECT `id` FROM `playlists` ORDER BY `playlists`.`created_at` DESC");
-        if (rows.length<1) return response.status(404,'API Playlists not found',res);
+        if (rows.length<1) return response.status(404,'API: Playlists not found',res);
         return response.status(200,rows,res);
     }
     catch(error)
@@ -20,11 +20,11 @@ exports.getByID = async (req,res) =>
     try
     {
         const rows = await queryPromise("SELECT * FROM `view_playlist` WHERE `id` = ?",[req.params.id]);
-        if (rows.length<1) return response.status(404,'API Playlist not found',res);
+        if (rows.length<1) return response.status(404,'API: Playlist not found',res);
         const row = rows[0];
         if (!row.name) row.name = "Unnamed playlist";
         const songs = await queryPromise("SELECT `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `pos` ASC) - 1 AS `pos` FROM `view_playlist_songs` WHERE `playlistID` = ? ORDER BY `view_playlist_songs`.`pos`",[req.params.id]);
-        if (songs.length<1) row.songList = {error:{status:"404", message:"API Empty playlist"}};
+        if (songs.length<1) row.songList = {error:{status:"404", message:"API: Empty playlist"}};
         else
         {
             row.songList = {id:req.params.id,songs:[]};
@@ -67,7 +67,7 @@ exports.getCover = async (req,res) =>
 
         res.sendFile("images/covers/"+row.coversrc,{root: '.'}, function (error)
         {
-            if (error) return response.status(error.status,error,res);
+            if (error) return response.status(404,'API: Playlist cover file not found',res);
         });
     }
     catch(error)

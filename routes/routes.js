@@ -34,7 +34,6 @@ module.exports = (app) =>
     app.route("/api/users/:login/playlists/created/popular").get(userController.getCreatedPopularPlaylists);
     app.route("/api/users/:login/playlists/liked").get(userController.getLikedPlaylists);
 
-    app.route("/api/users/:login/links").get(userController.getLinks);
     app.route("/api/users/:login/followers").get(userController.getFollowers);
     app.route("/api/users/:login/following").get(userController.getFollowing);
 
@@ -50,8 +49,8 @@ module.exports = (app) =>
 
     app.route("/api/users/:login/profile").get(middleware.authToken, userController.getProfile);
 
-    app.route("/api/users/:id/action/follow/post").post(middleware.authToken, userController.postFollow);
-    app.route("/api/users/:id/action/follow/delete").post(middleware.authToken, userController.deleteFollow);
+    app.route("/api/users/:login/action/follow/post").post(middleware.authToken, userController.postFollow);
+    app.route("/api/users/:login/action/follow/delete").post(middleware.authToken, userController.deleteFollow);
     app.route("/api/users/:login/action/edit/profile").put(middleware.authToken, userController.putProfile);
 
     app.route("/api/songs/:id").get(middleware.authToken, songController.getByID);

@@ -252,7 +252,7 @@ exports.postFollow = async (req,res) =>
     {
         if (!req.user?.login) return response.status(401,"API: Auth required",res);
         const sql = 'INSERT INTO `user_follows`(`user_login`,`user_follower_login`,`time`) VALUES (?,?,?)';
-        await queryPromise(sql,[req.params.id,req.user.login,new Date().toISOString().slice(0, 19).replace('T', ' ')]);
+        await queryPromise(sql,[req.params.login,req.user.login,new Date().toISOString().slice(0, 19).replace('T', ' ')]);
         return response.status(201,' API: Follow posted',res);
     }
     catch(error)
@@ -267,7 +267,7 @@ exports.deleteFollow = async (req,res) =>
     {
         if (!req.user?.login) return response.status(401,"API: Auth required",res);
         const sql = 'DELETE FROM `user_follows` WHERE `user_login`=? AND `user_follower_login`=?';
-        await queryPromise(sql,[req.params.id,req.user.login,new Date().toISOString().slice(0, 19).replace('T', ' ')]);
+        await queryPromise(sql,[req.params.login,req.user.login]);
         return response.status(201,'API: Follow deleted',res);
     }
     catch(error)

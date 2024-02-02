@@ -52,6 +52,7 @@ module.exports = (app) =>
 
     app.route("/api/users/:id/action/follow/post").post(middleware.authToken, userController.postFollow);
     app.route("/api/users/:id/action/follow/delete").post(middleware.authToken, userController.deleteFollow);
+    app.route("/api/users/:login/action/edit/profile").put(middleware.authToken, userController.putProfile);
 
     app.route("/api/songs/:id").get(middleware.authToken, songController.getByID);
     app.route('/api/playlists/:id').get(middleware.authToken, playlistController.getByID);

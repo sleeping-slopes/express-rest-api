@@ -275,3 +275,31 @@ exports.deleteFollow = async (req,res) =>
         return response.status(400,error.message,res);
     }
 }
+
+
+exports.putProfile = async (req,res) =>
+{
+    try
+    {
+
+        if (!req.user?.login) return response.status(401,"API: Auth required",res);
+        if (req.user.login!=req.params.login) return response.status(401,"API: Can't edit other user",res);
+        const sql = 'UPDATE `audioplayerdb`.`users` SET `username` = ?, `status` = ?,`city` = ?,`country` = ?,`bio` = ? WHERE (`login` = ?)';
+        await queryPromise(sql,[req.body.username,req.body.status,req.body.city,req.body.country,req.body.bio,req.user.login]);
+
+        const deleteAllLinksSQL = 'DELETE FROM `user_links` WHERE`userLogin` = ?'
+        await queryPromise(deleteAllLinksSQL,[req.user.login]);
+
+        for (let i = 0;i<req.body.links.length;i++)
+        {
+            const insertLinkSQL = 'INSERT INTO `audioplayerdb`.`user_links` (`userLogin`, `url`, `description`) VALUES (?, ?, ?)';
+            await queryPromise(insertLinkSQL,[req.user.login,req.body.links[i].url,req.body.links[i].description || req.body.links[i].url]);
+        }
+
+        return response.status(201,'API: User profile updated',res);
+    }
+    catch(error)
+    {
+        return response.status(400,error.message,res);
+    }
+}

@@ -80,10 +80,10 @@ exports.postLike = async (req,res) =>
 {
     try
     {
-        if (!req.user?.login) return response.status(401,"API: No auth",res);
+        if (!req.user?.login) return response.status(401,"API: Auth required",res);
         const sql = 'INSERT INTO `playlist_likes`(`userLogin`,`playlistID`,`time`) VALUES (?,?,?)';
         await queryPromise(sql,[req.user.login,req.params.id,new Date().toISOString().slice(0, 19).replace('T', ' ')]);
-        return response.status(201,'API: Playlist liked',res);
+        return response.status(201,'API: Playlist like posted',res);
     }
     catch(error)
     {
@@ -95,10 +95,10 @@ exports.deleteLike = async (req,res) =>
 {
     try
     {
-        if (!req.user?.login) return response.status(401,"no auth",res);
+        if (!req.user?.login) return response.status(401,"API: Auth required",res);
         const sql = 'DELETE FROM `playlist_likes` WHERE`userLogin`=? AND `playlistID`=?';
         await queryPromise(sql,[req.user.login,req.params.id]);
-        return response.status(201,'API: Playlist disliked',res);
+        return response.status(201,'API: Playlist like deleted',res);
     }
     catch(error)
     {

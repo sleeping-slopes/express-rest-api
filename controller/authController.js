@@ -14,8 +14,8 @@ exports.signUp = async (req,res) =>
             const row = JSON.parse(JSON.stringify(rows));
             row.map(r=>
             {
-                if (r.email==req.body.email) error.emailError = 'Account with this email already exists';
-                if (r.login==req.body.login) error.loginError = 'Account with this login already exists';
+                if (r.email==req.body.email) error.emailError = 'Account with this email already exists.';
+                if (r.login==req.body.login) error.loginError = 'Account with this login already exists.';
                 return true;
             });
             return response.status(409,error,res);
@@ -39,13 +39,13 @@ exports.logIn = async (req,res) =>
 
         if (rows.length<1)
         {
-            const error = { loginError: 'User with this login/email does not exist' };
+            const error = { loginError: 'User with this login/email does not exist.' };
             return response.status(404,error,res);
         }
         const row = rows[0];
         if (row.password!=req.body.password)
         {
-            const error = { passwordError: 'Incorrect password' };
+            const error = { passwordError: 'Incorrect password.' };
             return response.status(401,error,res);
         }
         const token = jwt.sign({ login: row.login },config.JWTSECRET);

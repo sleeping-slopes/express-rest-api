@@ -7,7 +7,7 @@ exports.getByVerifiedJWT = async (req,res) =>
 {
     try
     {
-        if (!req.user) return response.status(401,'API: No auth',res);
+        if (!req.user) return response.status(401,'API: Auth required',res);
         const rows = await queryPromise('SELECT `login` FROM `users` WHERE `login` = ?',[req.user.login]);
         if (rows.length<1) return response.status(404,'API: User not found',res);
         const row = rows[0];
@@ -83,7 +83,7 @@ exports.getAllSongs = async (req,res) =>
     {
         const sql = "SELECT `id`, ROW_NUMBER() OVER(PARTITION BY null) - 1 AS `pos` FROM(SELECT DISTINCT `id` FROM(SELECT `songID` as `id`,`time` FROM `song_likes` WHERE `userLogin` = ? UNION SELECT `songID` as `id`,`created_at` FROM `view_song_artists` WHERE `login` = ? ORDER by `time` DESC) as a) as b";
         const rows = await queryPromise(sql,[req.params.login,req.params.login]);
-        if (rows.length<1) return response.status(404,'API: No All songs',res);
+        if (rows.length<1) return response.status(404,'API: User has not created or liked any song yet',res);
         return response.status(200,{id:'API '+req.params.login+" ALL",songs:rows},res);
     }
     catch(error)
@@ -97,7 +97,7 @@ exports.getCreatedSongs = async (req,res) =>
     try
     {
         const rows = await queryPromise('SELECT `songID` as `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `created_at` DESC) - 1 AS `pos` FROM `view_song_artists` WHERE `login` = ?',[req.params.login]);
-        if (rows.length<1) return response.status(404,'API: No created songs',res);
+        if (rows.length<1) return response.status(404,'API: User has not created any song yet',res);
         return response.status(200,{id:'API '+req.params.login+" created",songs:rows},res);
     }
     catch(error)
@@ -111,7 +111,7 @@ exports.getCreatedPopularSongs = async (req,res) =>
     try
     {
         const rows = await queryPromise('SELECT `songID` as `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `likes_count` DESC) - 1 AS `pos` FROM `view_song_artists` WHERE `login` = ?',[req.params.login]);
-        if (rows.length<1) return response.status(404,'API: No created popular songs',res);
+        if (rows.length<1) return response.status(404,'API: User has not created any song yet',res);
         return response.status(200,{id:'API '+req.params.login+" created popular",songs:rows},res);
     }
     catch(error)
@@ -125,7 +125,7 @@ exports.getLikedSongs = async (req,res) =>
     try
     {
         const rows = await queryPromise('SELECT `songID` as `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `song_likes`.`time` DESC) - 1 AS `pos` FROM `song_likes` WHERE `userLogin` = ?',[req.params.login]);
-        if (rows.length<1) return response.status(404,'API: No liked songs',res);
+        if (rows.length<1) return response.status(404,'API: User has not liked any song yet',res);
         return response.status(200,{id:'API '+req.params.login+" liked",songs:rows},res);
     }
     catch(error)
@@ -140,7 +140,7 @@ exports.getAllPlaylists = async (req,res) =>
     {
         const sql = "SELECT DISTINCT `id` FROM(SELECT `playlistID` as `id`,`time` FROM `playlist_likes` WHERE `userLogin` = ? UNION SELECT `playlistID` as `id`,`created_at` FROM `view_playlist_artists` WHERE `login` = ? ORDER by `time` DESC) as a";
         const rows = await queryPromise(sql,[req.params.login,req.params.login]);
-        if (rows.length<1) return response.status(404,'API: No all playlists',res);
+        if (rows.length<1) return response.status(404,'API: User has not created or liked any playlist yet',res);
         return response.status(200,rows,res);
     }
     catch(error)
@@ -154,7 +154,7 @@ exports.getCreatedPlaylists = async (req,res) =>
     try
     {
         const rows = await queryPromise('SELECT `playlistID` as `id` FROM `view_playlist_artists` WHERE `login` = ? ORDER BY `created_at` DESC',[req.params.login]);
-        if (rows.length<1) return response.status(404,'API: No created playlists',res);
+        if (rows.length<1) return response.status(404,'API: User has not created any playlist yet',res);
         return response.status(200,rows,res);
     }
     catch(error)
@@ -168,7 +168,7 @@ exports.getCreatedPopularPlaylists = async (req,res) =>
     try
     {
         const rows = await queryPromise('SELECT `playlistID` as `id` FROM `view_playlist_artists` WHERE `login` = ? ORDER BY `likes_count` DESC',[req.params.login]);
-        if (rows.length<1) return response.status(404,'API: No created popular playlists',res);
+        if (rows.length<1) return response.status(404,'API: User has not created any playlist yet',res);
         return response.status(200,rows,res);
     }
     catch(error)
@@ -182,7 +182,7 @@ exports.getLikedPlaylists = async (req,res) =>
     try
     {
         const rows = await queryPromise('SELECT `playlistID` as `id` FROM `playlist_likes` WHERE `userLogin` = ? ORDER BY `playlist_likes`.`time` DESC',[req.params.login]);
-        if (rows.length<1) return response.status(404,'API: No liked playlists',res);
+        if (rows.length<1) return response.status(404,'API: User has not liked any playlist yet',res);
         return response.status(200,rows,res);
     }
     catch(error)
@@ -196,7 +196,7 @@ exports.getProfilePicture = async (req,res) =>
     try
     {
         const rows = await queryPromise("SELECT `profile_picture` FROM `users` WHERE `login` = ?",[req.params.login]);
-        if (rows.length<1) return response.status(404,' API: User not found',res);
+        if (rows.length<1) return response.status(404,'API: User not found',res);
         const row = rows[0];
 
         res.sendFile("images/user images/profile pictures/"+row.profile_picture,{root: '.'}, function (error)
@@ -234,7 +234,7 @@ exports.getFollowers = async (req,res) =>
     try
     {
         const rows = await queryPromise("SELECT `user_follower_login` as `login` FROM `user_follows` WHERE `user_login` = ? ORDER BY `time` DESC",[req.params.login]);
-        if (rows.length<1) return response.status(404,'API: No followers',res);
+        if (rows.length<1) return response.status(404,'API: User has not any followers yet',res);
         return response.status(200,rows,res);
     }
     catch(error)
@@ -248,7 +248,7 @@ exports.getFollowing = async (req,res) =>
     try
     {
         const rows = await queryPromise("SELECT `user_login` as `login` FROM `user_follows` WHERE `user_follower_login` = ? ORDER BY `time` DESC",[req.params.login]);
-        if (rows.length<1) return response.status(404,'API: No follows',res);
+        if (rows.length<1) return response.status(404,'API: User has not following anyone yet',res);
         return response.status(200,rows,res);
     }
     catch(error)
@@ -261,7 +261,7 @@ exports.postFollow = async (req,res) =>
 {
     try
     {
-        if (!req.user?.login) return response.status(401," API: No auth",res);
+        if (!req.user?.login) return response.status(401,"API: Auth required",res);
         const sql = 'INSERT INTO `user_follows`(`user_login`,`user_follower_login`,`time`) VALUES (?,?,?)';
         await queryPromise(sql,[req.params.id,req.user.login,new Date().toISOString().slice(0, 19).replace('T', ' ')]);
         return response.status(201,' API: Follow posted',res);
@@ -276,7 +276,7 @@ exports.deleteFollow = async (req,res) =>
 {
     try
     {
-        if (!req.user?.login) return response.status(401,"no auth",res);
+        if (!req.user?.login) return response.status(401,"API: Auth required",res);
         const sql = 'DELETE FROM `user_follows` WHERE `user_login`=? AND `user_follower_login`=?';
         await queryPromise(sql,[req.params.id,req.user.login,new Date().toISOString().slice(0, 19).replace('T', ' ')]);
         return response.status(201,'API: Follow deleted',res);

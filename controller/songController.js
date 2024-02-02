@@ -90,7 +90,7 @@ exports.getLikes = async (req,res) =>
     try
     {
         const rows = await queryPromise("SELECT `userLogin` as `login` FROM `song_likes` WHERE `songID` = ? ORDER BY `time` DESC",[req.params.id]);
-        if (rows.length<1) return response.status(404,'API: No likes',res);
+        if (rows.length<1) return response.status(404,'API: No one liked this song yet',res);
         return response.status(200,rows,res);
     }
     catch(error)
@@ -104,7 +104,7 @@ exports.getPlaylists = async (req,res) =>
     try
     {
         const rows = await queryPromise("SELECT DISTINCT `playlistID` as `id` FROM `playlist_songs` WHERE `songID` = ?",[req.params.id]);
-        if (rows.length<1) return response.status(404,'API: Playlists not found',res);
+        if (rows.length<1) return response.status(404,'API: No one added this song to playlist yet',res);
         return response.status(200,rows,res);
     }
     catch(error)
@@ -119,7 +119,7 @@ exports.getRelated = async (req,res) =>
     {
         const sql ="SELECT `songs`.`id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY count(`songs`.`id`) DESC) - 1 AS `pos` from `songs` INNER JOIN `song_tags` on `song_tags`.`songID` = `songs`.`id` WHERE `song_tags`.`tag` in (SELECT `tag` FROM `song_tags` WHERE `song_tags`.`songID`=?) AND `songs`.`id`!=? GROUP BY (`songs`.`id`)";
         const rows = await queryPromise(sql,[req.params.id,req.params.id]);
-        if (rows.length<1) return response.status(404,'API: Songs not found',res);
+        if (rows.length<1) return response.status(404,'API: Related songs not found',res);
         return response.status(200,{id:'API GET RELATED '+req.params.id,songs:rows},res);
     }
     catch(error)
@@ -134,7 +134,7 @@ exports.getTaggedPopular = async (req,res) =>
     {
         const sql = "SELECT `view_song`.`id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `view_song`.`likes_count` DESC) - 1 AS `pos` FROM `song_tags` INNER JOIN `view_song` on `song_tags`.`songID` = `view_song`.`id` WHERE `song_tags`.`tag` = ?";
         const rows = await queryPromise(sql,[req.params.tag]);
-        if (rows.length<1) return response.status(404,'API: Songs not found',res);
+        if (rows.length<1) return response.status(404,'API: Songs tagged #'+req.params.tag+' not found',res);
         return response.status(200,{id:'API TAGGED '+req.params.tag+' POPULAR',songs:rows},res);
     }
     catch(error)
@@ -149,7 +149,7 @@ exports.getTaggedNew = async (req,res) =>
     {
         const sql = "SELECT `view_song`.`id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `view_song`.`created_at` DESC) - 1 AS `pos` FROM `song_tags` INNER JOIN `view_song` on `song_tags`.`songID` = `view_song`.`id` WHERE `song_tags`.`tag` = ?";
         const rows = await queryPromise(sql,[req.params.tag]);
-        if (rows.length<1) return response.status(404,'API: Songs not found',res);
+        if (rows.length<1) return response.status(404,'API: Songs tagged #'+req.params.tag+' not found',res);
         return response.status(200,{id:'API TAGGED '+req.params.tag+' NEW',songs:rows},res);
     }
     catch(error)
@@ -162,10 +162,10 @@ exports.postLike = async (req,res) =>
 {
     try
     {
-        if (!req.user?.login) return response.status(401,"API: No auth",res);
+        if (!req.user?.login) return response.status(401,"API: Auth required",res);
         const sql = 'INSERT INTO `song_likes`(`userLogin`,`songID`,`time`) VALUES (?,?,?)';
         await queryPromise(sql,[req.user.login,req.params.id,new Date().toISOString().slice(0, 19).replace('T', ' ')]);
-        return response.status(201,'API: Song liked',res);
+        return response.status(201,'API: Song like posted',res);
     }
     catch(error)
     {
@@ -177,10 +177,10 @@ exports.deleteLike = async (req,res) =>
 {
     try
     {
-        if (!req.user?.login) return response.status(401,"API: No auth",res);
+        if (!req.user?.login) return response.status(401,"API: Auth required",res);
         const sql = 'DELETE FROM `song_likes` WHERE`userLogin`=? AND `songID`=?';
         await queryPromise(sql,[req.user.login,req.params.id]);
-        return response.status(201,'API: Song disliked',res);
+        return response.status(201,'API: Song like deleted',res);
     }
     catch(error)
     {

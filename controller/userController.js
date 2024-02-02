@@ -43,6 +43,9 @@ exports.getProfile = async (req,res) =>
         if (rows.length<1) return response.status(404,'API: User not found',res);
         const row = rows[0];
         if (!rows[0].username) rows[0].username = req.params.login;
+        const links = await queryPromise('SELECT `url`,`description` FROM `user_links` WHERE `userLogin` = ?',[req.params.login]);
+        links.forEach(link => { if (!link.description) link.description=link.url });
+        row.links=links;
         if (req.user)
         {
             if (req.user.login==req.params.login) row.me=true;
@@ -56,20 +59,6 @@ exports.getProfile = async (req,res) =>
             }
         }
         return response.status(200,row,res);
-    }
-    catch(error)
-    {
-        return response.status(400,error.message,res);
-    }
-}
-
-exports.getLinks = async (req,res) =>
-{
-    try
-    {
-        const rows = await queryPromise('SELECT `url`,`description` FROM `user_links` WHERE `userLogin` = ?',[req.params.login]);
-        rows.forEach(row => { if (!row.description) row.description=row.url });
-        return response.status(200,rows,res);
     }
     catch(error)
     {

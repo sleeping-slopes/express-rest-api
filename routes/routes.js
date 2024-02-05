@@ -6,6 +6,7 @@ module.exports = (app) =>
     app.route("/api/me/").get(middleware.authToken, meController.getByVerifiedJWT);
     // app.route("/api/me/credentials").get(middleware.authToken, meController.getCredentials);
     // app.route("/api/me/credentials").put(middleware.authToken, meController.putCredentials);
+    app.route("/api/me").delete(middleware.authToken, meController.deleteMe);
     app.route("/api/me/profile").put(middleware.authToken, meController.putProfile);
     app.route("/api/me/songs/likes").patch(middleware.authToken, meController.patchSongLikes);
     app.route("/api/me/playlists/likes").patch(middleware.authToken, meController.patchPlaylistLikes);

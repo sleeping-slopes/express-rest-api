@@ -17,6 +17,58 @@ exports.getByVerifiedJWT = async (req,res) =>
     }
 }
 
+exports.deleteMe = async (req,res) =>
+{
+    try
+    {
+        if (!req.user) return response.status(401,'API: Auth required',res);
+
+        const deleteMeResult = await queryPromise('DELETE FROM `users` WHERE `login` = ?',[req.user.login]);
+        if (!deleteMeResult.affectedRows) return response.status(304,'API: User not modified',res)
+
+        return response.status(204, 'API: User deleted');
+    }
+    catch(error)
+    {
+        return response.status(400,error.message,res);
+    }
+}
+
+exports.getCredentials = async (req,res) =>
+{
+    try
+    {
+        if (!req.user) return response.status(401,'API: Auth required',res);
+
+        const users = await queryPromise('SELECT `email` FROM `users` WHERE `login` = ?',[req.user.login]);
+        if (users.length<1) return response.status(404,'API: User not found',res);
+        const user = users[0];
+
+        return response.status(200,user,res);
+    }
+    catch(error)
+    {
+        return response.status(400,error.message,res);
+    }
+}
+
+exports.putCredentials = async (req,res) =>
+{
+    try
+    {
+        if (!req.user) return response.status(401,'API: Auth required',res);
+
+        const putCredentialsResult = await queryPromise('UPDATE `users` SET `email` = ? WHERE `login` = ?',[req.body.email, req.user.login]);
+        if (!putCredentialsResult.affectedRows) return response.status(304,'API: User credentials not modified',res);
+
+        return response.status(200,'API: User credentials updated',res);
+    }
+    catch(error)
+    {
+        return response.status(400,error.message,res);
+    }
+}
+
 exports.putProfile = async (req,res) =>
 {
     try

@@ -7,6 +7,7 @@ exports.getAll = async (req,res) =>
     {
         const songs = await queryPromise("SELECT `id`,ROW_NUMBER() OVER(PARTITION BY null ORDER BY `songs`.`created_at` DESC) - 1 AS `pos` FROM `songs`");
         if (songs.length<1) return response.status(404,'API: Songs not found',res);
+
         return response.status(200,{id:'API GET ALL',songs:songs},res);
     }
     catch(error)
@@ -21,6 +22,7 @@ exports.getByID = async (req,res) =>
     {
         const songs = await queryPromise("SELECT * FROM `view_song` WHERE `id` = ?",[req.params.id]);
         if (songs.length<1) return response.status(404,'API: Song not found',res);
+
         const song = songs[0];
         if (!song.name) song.name = "Unnamed song";
         song.artists = [];
@@ -35,6 +37,7 @@ exports.getByID = async (req,res) =>
                 song.artists.push({login:songArtist.login,name:songArtist.pseudoname || songArtist.username || songArtist.login});
             });
         }
+
         const songTags = await queryPromise('SELECT `tag` FROM `song_tags` WHERE `songID` = ?',[req.params.id]);
         song.tags = songTags;
         if (req.user)
@@ -43,6 +46,7 @@ exports.getByID = async (req,res) =>
             song.liked = songYouLiked.length>0;
         }
         else song.liked = false;
+
         return response.status(200,song,res);
     }
     catch(error)
@@ -58,6 +62,7 @@ exports.getAudio = async (req,res) =>
         const songAudios = await queryPromise("SELECT `audiosrc` FROM `songs` WHERE `id` = ?",[req.params.id]);
         if (songAudios.length<1) return response.status(404,'API: Song not found',res);
         const songAudio = songAudios[0];
+
         res.sendFile("audio/"+songAudio.audiosrc,{root: '.'}, (error)=>
         {
             if (error) return response.status(404,'API: Song audio file not found',res);
@@ -76,6 +81,7 @@ exports.getCover = async (req,res) =>
         const songCovers = await queryPromise("SELECT `coversrc` FROM `songs` WHERE `id` = ?",[req.params.id]);
         if (songCovers.length<1) return response.status(404,'API: Song not found',res);
         const songCover = songCovers[0];
+
         res.sendFile("images/covers/"+songCover.coversrc,{root: '.'}, function (error)
         {
             if (error) return response.status(404,'API: Song cover file not found',res);
@@ -93,6 +99,7 @@ exports.getLikes = async (req,res) =>
     {
         const songLikes = await queryPromise("SELECT `userLogin` as `login` FROM `song_likes` WHERE `songID` = ? ORDER BY `time` DESC",[req.params.id]);
         if (songLikes.length<1) return response.status(404,'API: No one liked this song yet',res);
+
         return response.status(200,songLikes,res);
     }
     catch(error)
@@ -107,6 +114,7 @@ exports.getPlaylists = async (req,res) =>
     {
         const songPlaylists = await queryPromise("SELECT DISTINCT `playlistID` as `id` FROM `playlist_songs` WHERE `songID` = ?",[req.params.id]);
         if (songPlaylists.length<1) return response.status(404,'API: No one added this song to playlist yet',res);
+
         return response.status(200,songPlaylists,res);
     }
     catch(error)
@@ -122,6 +130,7 @@ exports.getRelated = async (req,res) =>
         const getRelatedSongsSQL ="SELECT `songs`.`id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY count(`songs`.`id`) DESC) - 1 AS `pos` from `songs` INNER JOIN `song_tags` on `song_tags`.`songID` = `songs`.`id` WHERE `song_tags`.`tag` in (SELECT `tag` FROM `song_tags` WHERE `song_tags`.`songID`=?) AND `songs`.`id`!=? GROUP BY (`songs`.`id`)";
         const songs = await queryPromise(getRelatedSongsSQL,[req.params.id,req.params.id]);
         if (songs.length<1) return response.status(404,'API: Related songs not found',res);
+
         return response.status(200,{id:'API GET RELATED '+req.params.id,songs:songs},res);
     }
     catch(error)
@@ -137,6 +146,7 @@ exports.getTaggedPopular = async (req,res) =>
         const getTaggedPopularSongsSQL = "SELECT `view_song`.`id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `view_song`.`likes_count` DESC) - 1 AS `pos` FROM `song_tags` INNER JOIN `view_song` on `song_tags`.`songID` = `view_song`.`id` WHERE `song_tags`.`tag` = ?";
         const songs = await queryPromise(getTaggedPopularSongsSQL,[req.params.tag]);
         if (songs.length<1) return response.status(404,'API: Songs tagged #'+req.params.tag+' not found',res);
+
         return response.status(200,{id:'API TAGGED '+req.params.tag+' POPULAR',songs:songs},res);
     }
     catch(error)
@@ -152,6 +162,7 @@ exports.getTaggedNew = async (req,res) =>
         const getTaggedNewSongsSQL = "SELECT `view_song`.`id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `view_song`.`created_at` DESC) - 1 AS `pos` FROM `song_tags` INNER JOIN `view_song` on `song_tags`.`songID` = `view_song`.`id` WHERE `song_tags`.`tag` = ?";
         const songs = await queryPromise(getTaggedNewSongsSQL,[req.params.tag]);
         if (songs.length<1) return response.status(404,'API: Songs tagged #'+req.params.tag+' not found',res);
+
         return response.status(200,{id:'API TAGGED '+req.params.tag+' NEW',songs:songs},res);
     }
     catch(error)

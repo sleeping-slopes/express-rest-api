@@ -7,6 +7,7 @@ exports.getAll = async (req,res) =>
     {
         const playlists = await queryPromise("SELECT `id` FROM `playlists` ORDER BY `playlists`.`created_at` DESC");
         if (playlists.length<1) return response.status(404,'API: Playlists not found',res);
+
         return response.status(200,playlists,res);
     }
     catch(error)
@@ -21,6 +22,7 @@ exports.getByID = async (req,res) =>
     {
         const playlists = await queryPromise("SELECT * FROM `view_playlist` WHERE `id` = ?",[req.params.id]);
         if (playlists.length<1) return response.status(404,'API: Playlist not found',res);
+
         const playlist = playlists[0];
         if (!playlist.name) playlist.name = "Unnamed playlist";
 
@@ -47,12 +49,14 @@ exports.getByID = async (req,res) =>
                 playlist.artists.push({login:playlistArtist.login,name:playlistArtist.pseudoname || playlistArtist.username || playlistArtist.login});
             });
         }
+
         if (req.user)
         {
             const playlistYouLiked = await queryPromise('SELECT `id` FROM `playlist_likes` WHERE `playlistID` = ? AND `userLogin` = ?',[playlist.id,req.user.login]);
             playlist.liked = playlistYouLiked.length>0;
         }
         else playlist.liked = false;
+
         return response.status(200,playlist,res);
     }
     catch(error)

@@ -79,33 +79,3 @@ exports.getCover = async (req,res) =>
         return response.status(400,error.message,res);
     }
 }
-
-exports.postLike = async (req,res) =>
-{
-    try
-    {
-        if (!req.user?.login) return response.status(401,"API: Auth required",res);
-        const postPlaylistLikeSQL = 'INSERT INTO `playlist_likes`(`userLogin`,`playlistID`,`time`) VALUES (?,?,?)';
-        await queryPromise(postPlaylistLikeSQL,[req.user.login,req.params.id,new Date().toISOString().slice(0, 19).replace('T', ' ')]);
-        return response.status(201,'API: Playlist like posted',res);
-    }
-    catch(error)
-    {
-        return response.status(400,error.message,res);
-    }
-}
-
-exports.deleteLike = async (req,res) =>
-{
-    try
-    {
-        if (!req.user?.login) return response.status(401,"API: Auth required",res);
-        const deletePlaylistLikeSQL = 'DELETE FROM `playlist_likes` WHERE`userLogin`=? AND `playlistID`=?';
-        await queryPromise(deletePlaylistLikeSQL,[req.user.login,req.params.id]);
-        return response.status(201,'API: Playlist like deleted',res);
-    }
-    catch(error)
-    {
-        return response.status(400,error.message,res);
-    }
-}

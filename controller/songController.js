@@ -91,9 +91,9 @@ exports.getLikes = async (req,res) =>
 {
     try
     {
-        const songUsersLiked = await queryPromise("SELECT `userLogin` as `login` FROM `song_likes` WHERE `songID` = ? ORDER BY `time` DESC",[req.params.id]);
-        if (songUsersLiked.length<1) return response.status(404,'API: No one liked this song yet',res);
-        return response.status(200,songUsersLiked,res);
+        const songLikes = await queryPromise("SELECT `userLogin` as `login` FROM `song_likes` WHERE `songID` = ? ORDER BY `time` DESC",[req.params.id]);
+        if (songLikes.length<1) return response.status(404,'API: No one liked this song yet',res);
+        return response.status(200,songLikes,res);
     }
     catch(error)
     {
@@ -153,36 +153,6 @@ exports.getTaggedNew = async (req,res) =>
         const songs = await queryPromise(getTaggedNewSongsSQL,[req.params.tag]);
         if (songs.length<1) return response.status(404,'API: Songs tagged #'+req.params.tag+' not found',res);
         return response.status(200,{id:'API TAGGED '+req.params.tag+' NEW',songs:songs},res);
-    }
-    catch(error)
-    {
-        return response.status(400,error.message,res);
-    }
-}
-
-exports.postLike = async (req,res) =>
-{
-    try
-    {
-        if (!req.user?.login) return response.status(401,"API: Auth required",res);
-        const postSongLikeSQL = 'INSERT INTO `song_likes`(`userLogin`,`songID`,`time`) VALUES (?,?,?)';
-        await queryPromise(postSongLikeSQL,[req.user.login,req.params.id,new Date().toISOString().slice(0, 19).replace('T', ' ')]);
-        return response.status(201,'API: Song like posted',res);
-    }
-    catch(error)
-    {
-        return response.status(400,error.message,res);
-    }
-}
-
-exports.deleteLike = async (req,res) =>
-{
-    try
-    {
-        if (!req.user?.login) return response.status(401,"API: Auth required",res);
-        const deleteSongLikeSQL = 'DELETE FROM `song_likes` WHERE`userLogin`=? AND `songID`=?';
-        await queryPromise(deleteSongLikeSQL,[req.user.login,req.params.id]);
-        return response.status(201,'API: Song like deleted',res);
     }
     catch(error)
     {

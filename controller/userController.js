@@ -1,17 +1,29 @@
 const response = require('./../response')
 const queryPromise = require('../settings/database')
 
+const jwt = require('jsonwebtoken')
+const config = require('../config')
 
-
-exports.getByVerifiedJWT = async (req,res) =>
+exports.postUser = async (req,res) =>
 {
     try
     {
-        if (!req.user) return response.status(401,'API: Auth required',res);
-        const users = await queryPromise('SELECT `login` FROM `users` WHERE `login` = ?',[req.user.login]);
-        if (users.length<1) return response.status(404,'API: User not found',res);
-        const user = users[0];
-        return response.status(200,user,res);
+        const users = await queryPromise("SELECT `login`,`email` FROM `users` WHERE `email` =  ? OR `login` = ?", [req.body.email,req.body.login]);
+        if (users.length>0)
+        {
+            const error = {};
+            users.map(user=>
+            {
+                if (user.email==req.body.email) error.emailError = 'Account with this email already exists.';
+                if (user.login==req.body.login) error.loginError = 'Account with this login already exists.';
+                return true;
+            });
+            return response.status(409,error,res);
+        }
+
+        await queryPromise('INSERT INTO `users`(`login`,`email`,`password`) VALUES (?,?,?)', [req.body.login,req.body.email,req.body.password]);
+        const token = jwt.sign({ login: req.body.login },config.JWTSECRET);
+        return response.status(201,{token: "Bearer " + token},res);
     }
     catch(error)
     {
@@ -111,12 +123,12 @@ exports.getCreatedPopularSongs = async (req,res) =>
     }
 }
 
-exports.getLikedSongs = async (req,res) =>
+exports.getSongLikes = async (req,res) =>
 {
     try
     {
-        const getUserLikedSongsSQL = 'SELECT `songID` as `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `song_likes`.`time` DESC) - 1 AS `pos` FROM `song_likes` WHERE `userLogin` = ?';
-        const songs = await queryPromise(getUserLikedSongsSQL,[req.params.login]);
+        const getUserSongLikesSQL = 'SELECT `songID` as `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `song_likes`.`time` DESC) - 1 AS `pos` FROM `song_likes` WHERE `userLogin` = ?';
+        const songs = await queryPromise(getUserSongLikesSQL,[req.params.login]);
         if (songs.length<1) return response.status(404,'API: User has not liked any song yet',res);
         return response.status(200,{id:'API '+req.params.login+" liked",songs:songs},res);
     }
@@ -171,12 +183,12 @@ exports.getCreatedPopularPlaylists = async (req,res) =>
     }
 }
 
-exports.getLikedPlaylists = async (req,res) =>
+exports.getPlaylistLikes = async (req,res) =>
 {
     try
     {
-        const getUserLikedPlaylistsSQL = "SELECT `playlistID` as `id` FROM `playlist_likes` WHERE `userLogin` = ? ORDER BY `playlist_likes`.`time` DESC";
-        const playlists = await queryPromise(getUserLikedPlaylistsSQL,[req.params.login]);
+        const getPlaylistLikesSQL = "SELECT `playlistID` as `id` FROM `playlist_likes` WHERE `userLogin` = ? ORDER BY `playlist_likes`.`time` DESC";
+        const playlists = await queryPromise(getPlaylistLikesSQL,[req.params.login]);
         if (playlists.length<1) return response.status(404,'API: User has not liked any playlist yet',res);
         return response.status(200,playlists,res);
     }
@@ -245,62 +257,6 @@ exports.getFollowing = async (req,res) =>
         const userFollowings = await queryPromise("SELECT `user_login` as `login` FROM `user_follows` WHERE `user_follower_login` = ? ORDER BY `time` DESC",[req.params.login]);
         if (userFollowings.length<1) return response.status(404,'API: User has not following anyone yet',res);
         return response.status(200,userFollowings,res);
-    }
-    catch(error)
-    {
-        return response.status(400,error.message,res);
-    }
-}
-
-exports.postFollow = async (req,res) =>
-{
-    try
-    {
-        if (!req.user?.login) return response.status(401,"API: Auth required",res);
-        const postUserFollowSQL = 'INSERT INTO `user_follows`(`user_login`,`user_follower_login`,`time`) VALUES (?,?,?)';
-        await queryPromise(postUserFollowSQL,[req.params.login,req.user.login,new Date().toISOString().slice(0, 19).replace('T', ' ')]);
-        return response.status(201,' API: Follow posted',res);
-    }
-    catch(error)
-    {
-        return response.status(400,error.message,res);
-    }
-}
-
-exports.deleteFollow = async (req,res) =>
-{
-    try
-    {
-        if (!req.user?.login) return response.status(401,"API: Auth required",res);
-        const deleteUserFollowSQL = 'DELETE FROM `user_follows` WHERE `user_login`=? AND `user_follower_login`=?';
-        await queryPromise(deleteUserFollowSQL,[req.params.login,req.user.login]);
-        return response.status(201,'API: Follow deleted',res);
-    }
-    catch(error)
-    {
-        return response.status(400,error.message,res);
-    }
-}
-
-exports.putProfile = async (req,res) =>
-{
-    try
-    {
-        if (!req.user?.login) return response.status(401,"API: Auth required",res);
-        if (req.user.login!=req.params.login) return response.status(401,"API: Can't edit other user",res);
-        const putUserProfileSQL = 'UPDATE `audioplayerdb`.`users` SET `username` = ?, `status` = ?,`city` = ?,`country` = ?,`bio` = ? WHERE (`login` = ?)';
-        await queryPromise(putUserProfileSQL,[req.body.username,req.body.status,req.body.city,req.body.country,req.body.bio,req.user.login]);
-
-        const deleteAllLinksSQL = 'DELETE FROM `user_links` WHERE`userLogin` = ?'
-        await queryPromise(deleteAllLinksSQL,[req.user.login]);
-
-        for (let i = 0;i<req.body.links.length;i++)
-        {
-            const insertLinkSQL = 'INSERT INTO `audioplayerdb`.`user_links` (`userLogin`, `url`, `description`) VALUES (?, ?, ?)';
-            await queryPromise(insertLinkSQL,[req.user.login,req.body.links[i].url,req.body.links[i].description || req.body.links[i].url]);
-        }
-
-        return response.status(201,'API: User profile updated',res);
     }
     catch(error)
     {

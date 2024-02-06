@@ -73,7 +73,7 @@ exports.getCover = async (req,res) =>
         if (playlistCovers.length<1) return response.status(404,'API: Playlist not found',res);
         const playlistCover = playlistCovers[0];
 
-        res.sendFile("images/covers/"+playlistCover.coversrc,{root: '.'}, function (error)
+        res.sendFile("upload/images/covers/"+playlistCover.coversrc,{root: '.'}, function (error)
         {
             if (error) return response.status(404,'API: Playlist cover file not found',res);
         });

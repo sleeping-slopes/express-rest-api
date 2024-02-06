@@ -221,7 +221,7 @@ exports.getProfilePicture = async (req,res) =>
         if (userProfilePictures.length<1) return response.status(404,'API: User not found',res);
         const userProfilePicture = userProfilePictures[0];
 
-        res.sendFile("images/user images/profile pictures/"+userProfilePicture.profile_picture,{root: '.'}, function (error)
+        res.sendFile("upload/images/user images/profile pictures/"+userProfilePicture.profile_picture,{root: '.'}, function (error)
         {
             if (error) return response.status(404,'API: User profile picture file not found',res);
         });
@@ -240,7 +240,7 @@ exports.getBanner = async (req,res) =>
         if (userBanners.length<1) return response.status(404,'API: User not found',res);
         const userBanner = userBanners[0];
 
-        res.sendFile("images/user images/banners/"+userBanner.banner,{root: '.'}, function (error)
+        res.sendFile("upload/images/user images/banners/"+userBanner.banner,{root: '.'}, function (error)
         {
             if (error) return response.status(404,'API: User banner picture file not found',res);
         });

@@ -1,5 +1,9 @@
 module.exports = (app) =>
 {
+    const multer  = require('multer');
+    const multerStorage = require('../settings/multerStorage');
+    const upload = multer({ storage: multerStorage });
+
     const middleware = require('./../middleware/middleware');
 
     const meController = require('../controller/meController');

@@ -63,7 +63,7 @@ exports.getAudio = async (req,res) =>
         if (songAudios.length<1) return response.status(404,'API: Song not found',res);
         const songAudio = songAudios[0];
 
-        res.sendFile("audio/"+songAudio.audiosrc,{root: '.'}, (error)=>
+        res.sendFile("upload/audio/"+songAudio.audiosrc,{root: '.'}, (error)=>
         {
             if (error) return response.status(404,'API: Song audio file not found',res);
         });
@@ -82,7 +82,7 @@ exports.getCover = async (req,res) =>
         if (songCovers.length<1) return response.status(404,'API: Song not found',res);
         const songCover = songCovers[0];
 
-        res.sendFile("images/covers/"+songCover.coversrc,{root: '.'}, function (error)
+        res.sendFile("upload/images/covers/"+songCover.coversrc,{root: '.'}, function (error)
         {
             if (error) return response.status(404,'API: Song cover file not found',res);
         });

@@ -202,6 +202,16 @@ exports.deleteFollowing = async (req,res) =>
         return response.status(400,error.message,res);
     }
 }
+
+exports.postProfilePicture = async (req,res) =>
+{
+    try
+    {
+        if (!req.user?.login) return response.status(401,"API: Auth required",res);
+
+        const postProfilePictureResult = await queryPromise("UPDATE `users` SET `profile_picture` = ? WHERE `login` = ?",[req.file.filename,req.user.login]);
+
+        return response.status(200,'API: User profile picture updated',res);
     }
     catch(error)
     {

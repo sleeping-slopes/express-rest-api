@@ -13,6 +13,8 @@ module.exports = (app) =>
     app.route("/api/me/credentials").put(middleware.authToken, meController.putCredentials);
     app.route("/api/me/profile").put(middleware.authToken, meController.putProfile);
 
+    app.route("/api/me/profile-picture").post(middleware.authToken, upload.single('userProfilePicture'), meController.postProfilePicture);
+
     app.route("/api/me/songs/likes").post(middleware.authToken, meController.postSongLike);
     app.route("/api/me/songs/likes/:id").delete(middleware.authToken, meController.deleteSongLike);
 

@@ -26,9 +26,9 @@ exports.deleteMe = async (req,res) =>
         if (!req.user) return response.status(401,'API: Auth required',res);
 
         const deleteMeResult = await queryPromise('DELETE FROM `users` WHERE `login` = ?',[req.user.login]);
-        if (!deleteMeResult.affectedRows) return response.status(304,'API: User not modified',res)
+        if (!deleteMeResult.affectedRows) return response.status(304,'API: User not modified',res);
 
-        return response.status(204, 'API: User deleted');
+        return response.status(204, 'API: User deleted',res);
     }
     catch(error)
     {
@@ -98,27 +98,16 @@ exports.putProfile = async (req,res) =>
     }
 }
 
-exports.patchSongLikes = async (req,res) =>
+exports.postSongLike = async (req,res) =>
 {
     try
     {
         if (!req.user?.login) return response.status(401,"API: Auth required",res);
-        switch (req.body.op)
-        {
-            case "add":
-                const postSongLikeSQL = 'INSERT INTO `song_likes`(`userLogin`,`songID`,`time`) VALUES (?,?,?)';
-                await queryPromise(postSongLikeSQL,[req.user.login,req.body.id,new Date().toISOString().slice(0, 19).replace('T', ' ')]);
-                return response.status(200,'API: Song like added',res);
 
-            case "remove":
-                const deleteSongLikeSQL = 'DELETE FROM `song_likes` WHERE`userLogin`=? AND `songID`=?';
-                const deleteSongLikeResult = await queryPromise(deleteSongLikeSQL,[req.user.login,req.body.id]);
-                if (!deleteSongLikeResult.affectedRows) return response.status(304,'API: User song likes not modified',res);
-                return response.status(204,'API: Song like removed',res);
+        const postSongLikeSQL = 'INSERT INTO `song_likes`(`userLogin`,`songID`,`time`) VALUES (?,?,?)';
+        await queryPromise(postSongLikeSQL,[req.user.login,req.body.id,new Date().toISOString().slice(0, 19).replace('T', ' ')]);
 
-            default:
-                throw new Error("API: Unknown op");
-        }
+        return response.status(200,'API: Song like posted',res);
     }
     catch(error)
     {
@@ -126,28 +115,17 @@ exports.patchSongLikes = async (req,res) =>
     }
 }
 
-exports.patchPlaylistLikes = async (req,res) =>
+exports.deleteSongLike = async (req,res) =>
 {
     try
     {
         if (!req.user?.login) return response.status(401,"API: Auth required",res);
 
-        switch (req.body.op)
-        {
-            case "add":
-                const postPlaylistLikeSQL = 'INSERT INTO `playlist_likes`(`userLogin`,`playlistID`,`time`) VALUES (?,?,?)';
-                await queryPromise(postPlaylistLikeSQL,[req.user.login,req.body.id,new Date().toISOString().slice(0, 19).replace('T', ' ')]);
-                return response.status(200,'API: Playlist like added',res);
+        const deleteSongLikeSQL = 'DELETE FROM `song_likes` WHERE`userLogin`=? AND `songID`=?';
+        const deleteSongLikeResult = await queryPromise(deleteSongLikeSQL,[req.user.login,req.params.id]);
+        if (!deleteSongLikeResult.affectedRows) return response.status(404,'API: Song like not found',res);
 
-            case "remove":
-                const deletePlaylistLikeSQL = 'DELETE FROM `playlist_likes` WHERE`userLogin`=? AND `playlistID`=?';
-                const deletePlaylistLikeResult = await queryPromise(deletePlaylistLikeSQL,[req.user.login,req.body.id]);
-                if (!deletePlaylistLikeResult.affectedRows) return response.status(304,'API: User playlist likes not modified',res);
-                return response.status(204,'API: Playlist like removed',res);
-
-            default:
-                throw new Error("API: Unknown op");
-        }
+        return response.status(204,'API: Song like deleted',res);
     }
     catch(error)
     {
@@ -155,28 +133,75 @@ exports.patchPlaylistLikes = async (req,res) =>
     }
 }
 
-exports.patchFollowing = async (req,res) =>
+exports.postPlaylistLike = async (req,res) =>
 {
     try
     {
         if (!req.user?.login) return response.status(401,"API: Auth required",res);
 
-        switch (req.body.op)
-        {
-            case "add":
-                const postUserFollowSQL = 'INSERT INTO `user_follows`(`user_login`,`user_follower_login`,`time`) VALUES (?,?,?)';
-                await queryPromise(postUserFollowSQL,[req.body.login,req.user.login,new Date().toISOString().slice(0, 19).replace('T', ' ')]);
-                return response.status(200,'API: Follow added',res);
+        const postPlaylistLikeSQL = 'INSERT INTO `playlist_likes`(`userLogin`,`playlistID`,`time`) VALUES (?,?,?)';
+        await queryPromise(postPlaylistLikeSQL,[req.user.login,req.body.id,new Date().toISOString().slice(0, 19).replace('T', ' ')]);
 
-            case "remove":
-                const deleteUserFollowSQL = 'DELETE FROM `user_follows` WHERE `user_login`=? AND `user_follower_login`=?';
-                const deleteUserFollowResult = await queryPromise(deleteUserFollowSQL,[req.body.login,req.user.login]);
-                if (!deleteUserFollowResult.affectedRows) return response.status(304,'API: User follows not modified',res);
-                return response.status(204,'API: Follow deleted',res);
+        return response.status(200,'API: Playlist like posted',res);
+    }
+    catch(error)
+    {
+        return response.status(400,error.message,res);
+    }
+}
 
-            default:
-                throw new Error("API: Unknown op");
-        }
+exports.deletePlaylistLike = async (req,res) =>
+{
+    try
+    {
+        if (!req.user?.login) return response.status(401,"API: Auth required",res);
+
+        const deletePlaylistLikeSQL = 'DELETE FROM `playlist_likes` WHERE`userLogin`=? AND `playlistID`=?';
+        const deletePlaylistLikeResult = await queryPromise(deletePlaylistLikeSQL,[req.user.login,req.params.id]);
+        if (!deletePlaylistLikeResult.affectedRows) return response.status(404,'API: Playlist like not found',res);
+
+        return response.status(204,'API: Playlist like removed',res);
+    }
+    catch(error)
+    {
+        return response.status(400,error.message,res);
+    }
+}
+
+exports.postFollowing = async (req,res) =>
+{
+    try
+    {
+        if (!req.user?.login) return response.status(401,"API: Auth required",res);
+
+        const postUserFollowingSQL = 'INSERT INTO `user_follows`(`user_login`,`user_follower_login`,`time`) VALUES (?,?,?)';
+        await queryPromise(postUserFollowingSQL,[req.body.login,req.user.login,new Date().toISOString().slice(0, 19).replace('T', ' ')]);
+
+        return response.status(200,'API: Following posted',res);
+    }
+    catch(error)
+    {
+        return response.status(400,error.message,res);
+    }
+}
+
+exports.deleteFollowing = async (req,res) =>
+{
+    try
+    {
+        if (!req.user?.login) return response.status(401,"API: Auth required",res);
+
+        const deleteUserFollowingSQL = 'DELETE FROM `user_follows` WHERE `user_login`=? AND `user_follower_login`=?';
+        const deleteUserFollowingResult = await queryPromise(deleteUserFollowSQL,[req.params.login,req.user.login]);
+        if (!deleteUserFollowingResult.affectedRows) return response.status(404,'API: Following not found',res);
+
+        return response.status(204,'API: Following deleted',res);
+    }
+    catch(error)
+    {
+        return response.status(400,error.message,res);
+    }
+}
     }
     catch(error)
     {

@@ -12,9 +12,15 @@ module.exports = (app) =>
     app.route("/api/me/credentials").get(middleware.authToken, meController.getCredentials);
     app.route("/api/me/credentials").put(middleware.authToken, meController.putCredentials);
     app.route("/api/me/profile").put(middleware.authToken, meController.putProfile);
-    app.route("/api/me/songs/likes").patch(middleware.authToken, meController.patchSongLikes);
-    app.route("/api/me/playlists/likes").patch(middleware.authToken, meController.patchPlaylistLikes);
-    app.route("/api/me/users/following").patch(middleware.authToken, meController.patchFollowing);
+
+    app.route("/api/me/songs/likes").post(middleware.authToken, meController.postSongLike);
+    app.route("/api/me/songs/likes/:id").delete(middleware.authToken, meController.deleteSongLike);
+
+    app.route("/api/me/playlists/likes").post(middleware.authToken, meController.postPlaylistLike);
+    app.route("/api/me/playlists/likes/:id").delete(middleware.authToken, meController.deletePlaylistLike);
+
+    app.route("/api/me/users/following").post(middleware.authToken, meController.postFollowing);
+    app.route("/api/me/users/following/:login").delete(middleware.authToken, meController.deleteFollowing);
 
     const authController = require('../controller/authController');
     app.route('/api/auth/login').post(authController.logIn);

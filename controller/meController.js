@@ -218,3 +218,51 @@ exports.postProfilePicture = async (req,res) =>
         return response.status(400,error.message,res);
     }
 }
+
+exports.deleteProfilePicture = async (req,res) =>
+{
+    try
+    {
+        if (!req.user?.login) return response.status(401,"API: Auth required",res);
+
+        const deleteProfilePictureResult = await queryPromise("UPDATE `users` SET `profile_picture` = ? WHERE `login` = ?",[null, req.user.login]);
+
+        return response.status(200,'API: User profile picture updated',res);
+    }
+    catch(error)
+    {
+        return response.status(400,error.message,res);
+    }
+}
+
+exports.postBanner = async (req,res) =>
+{
+    try
+    {
+        if (!req.user?.login) return response.status(401,"API: Auth required",res);
+
+        const postBannerResult = await queryPromise("UPDATE `users` SET `banner` = ? WHERE `login` = ?",[req.file.filename,req.user.login]);
+
+        return response.status(200,'API: User banner updated',res);
+    }
+    catch(error)
+    {
+        return response.status(400,error.message,res);
+    }
+}
+
+exports.deleteBanner = async (req,res) =>
+{
+    try
+    {
+        if (!req.user?.login) return response.status(401,"API: Auth required",res);
+
+        const deleteBannerResult = await queryPromise("UPDATE `users` SET `banner` = ? WHERE `login` = ?",[null,req.user.login]);
+
+        return response.status(200,'API: User banner updated',res);
+    }
+    catch(error)
+    {
+        return response.status(400,error.message,res);
+    }
+}

@@ -1,19 +1,26 @@
+const multer  = require('multer');
+const multerStorage = require('../settings/multerStorage');
+const upload = multer({ storage: multerStorage });
+
 module.exports = (app) =>
 {
-    const multer  = require('multer');
-    const multerStorage = require('../settings/multerStorage');
-    const upload = multer({ storage: multerStorage });
-
     const middleware = require('./../middleware/middleware');
 
     const meController = require('../controller/meController');
     app.route("/api/me").get(middleware.authToken, meController.getMe);
+
     app.route("/api/me").delete(middleware.authToken, meController.deleteMe);
-    app.route("/api/me/credentials").get(middleware.authToken, meController.getCredentials);
-    app.route("/api/me/credentials").put(middleware.authToken, meController.putCredentials);
+
     app.route("/api/me/profile").put(middleware.authToken, meController.putProfile);
 
+    app.route("/api/me/credentials").get(middleware.authToken, meController.getCredentials);
+    app.route("/api/me/credentials").put(middleware.authToken, meController.putCredentials);
+
     app.route("/api/me/profile-picture").post(middleware.authToken, upload.single('userProfilePicture'), meController.postProfilePicture);
+    app.route("/api/me/profile-picture").delete(middleware.authToken,  meController.deleteProfilePicture);
+
+    app.route("/api/me/banner").post(middleware.authToken, upload.single('userBanner'), meController.postBanner);
+    app.route("/api/me/banner").delete(middleware.authToken,  meController.deleteBanner);
 
     app.route("/api/me/songs/likes").post(middleware.authToken, meController.postSongLike);
     app.route("/api/me/songs/likes/:id").delete(middleware.authToken, meController.deleteSongLike);
@@ -46,10 +53,12 @@ module.exports = (app) =>
 
     const userController = require('./../controller/userController');
     app.route("/api/users").post(userController.postUser);
+
     app.route("/api/users/:login/profile").get(middleware.authToken, userController.getProfile);
     app.route("/api/users/:login/username").get(userController.getUsername);
     app.route("/api/users/:login/picture").get(userController.getProfilePicture);
     app.route("/api/users/:login/banner").get(userController.getBanner);
+
     app.route("/api/users/:login/songs").get(userController.getAllSongs);
     app.route("/api/users/:login/songs/created").get(userController.getCreatedSongs);
     app.route("/api/users/:login/songs/created/popular").get(userController.getCreatedPopularSongs);

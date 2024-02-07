@@ -25,6 +25,7 @@ exports.getByID = async (req,res) =>
 
         const song = songs[0];
         if (!song.name) song.name = "Unnamed song";
+        song.cover=!!song.cover;
         song.artists = [];
 
         const getSongArtistsSQL = 'SELECT `login`,`username`,`pseudoname` FROM `view_song_artists` WHERE `songID` = ? ORDER BY `view_song_artists`.`artistSongPosition`';
@@ -78,11 +79,11 @@ exports.getCover = async (req,res) =>
 {
     try
     {
-        const songCovers = await queryPromise("SELECT `coversrc` FROM `songs` WHERE `id` = ?",[req.params.id]);
+        const songCovers = await queryPromise("SELECT `cover` FROM `songs` WHERE `id` = ?",[req.params.id]);
         if (songCovers.length<1) return response.status(404,'API: Song not found',res);
         const songCover = songCovers[0];
 
-        res.sendFile("upload/images/covers/"+songCover.coversrc,{root: '.'}, function (error)
+        res.sendFile("upload/images/covers/"+songCover.cover,{root: '.'}, function (error)
         {
             if (error) return response.status(404,'API: Song cover file not found',res);
         });

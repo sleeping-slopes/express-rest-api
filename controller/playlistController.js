@@ -25,6 +25,7 @@ exports.getByID = async (req,res) =>
 
         const playlist = playlists[0];
         if (!playlist.name) playlist.name = "Unnamed playlist";
+        playlist.cover=!!playlist.cover;
 
         const getPlaylistSongsSQL = "SELECT `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `pos` ASC) - 1 AS `pos` FROM `view_playlist_songs` WHERE `playlistID` = ? ORDER BY `view_playlist_songs`.`pos`";
         const playlistSongs = await queryPromise(getPlaylistSongsSQL,[req.params.id]);
@@ -69,11 +70,11 @@ exports.getCover = async (req,res) =>
 {
     try
     {
-        const playlistCovers = await queryPromise("SELECT `coversrc` FROM `playlists` WHERE `id` = ?",[req.params.id]);
+        const playlistCovers = await queryPromise("SELECT `cover` FROM `playlists` WHERE `id` = ?",[req.params.id]);
         if (playlistCovers.length<1) return response.status(404,'API: Playlist not found',res);
         const playlistCover = playlistCovers[0];
 
-        res.sendFile("upload/images/covers/"+playlistCover.coversrc,{root: '.'}, function (error)
+        res.sendFile("upload/images/covers/"+playlistCover.cover,{root: '.'}, function (error)
         {
             if (error) return response.status(404,'API: Playlist cover file not found',res);
         });

@@ -59,6 +59,8 @@ exports.getProfile = async (req,res) =>
         const user = users[0];
 
         if (!user.username) user.username = req.params.login;
+        user.banner = !!user.banner;
+        user.profile_picture = !!user.profile_picture;
 
         const userLinks = await queryPromise('SELECT `url`,`description` FROM `user_links` WHERE `userLogin` = ?',[req.params.login]);
         userLinks.forEach(userLink => { if (!userLink.description) userLink.description=userLink.url });

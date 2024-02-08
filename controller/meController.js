@@ -7,7 +7,7 @@ exports.getMe = async (req,res) =>
     {
         if (!req.user) return response.status(401,'API: Auth required',res);
 
-        const users = await queryPromise('SELECT `login` FROM `users` WHERE `login` = ?',[req.user.login]);
+        const users = await queryPromise('SELECT `login`, `email`, `custom_theme`, `theme`, `profile_picture` FROM `users` WHERE `login` = ?',[req.user.login]);
         if (users.length<1) return response.status(404,'API: User not found',res);
         const user = users[0];
 
@@ -36,24 +36,6 @@ exports.deleteMe = async (req,res) =>
     }
 }
 
-exports.getCredentials = async (req,res) =>
-{
-    try
-    {
-        if (!req.user) return response.status(401,'API: Auth required',res);
-
-        const users = await queryPromise('SELECT `email` FROM `users` WHERE `login` = ?',[req.user.login]);
-        if (users.length<1) return response.status(404,'API: User not found',res);
-        const user = users[0];
-
-        return response.status(200,user,res);
-    }
-    catch(error)
-    {
-        return response.status(400,error.message,res);
-    }
-}
-
 exports.putCredentials = async (req,res) =>
 {
     try
@@ -64,6 +46,23 @@ exports.putCredentials = async (req,res) =>
         if (!putCredentialsResult.affectedRows) return response.status(304,'API: User credentials not modified',res);
 
         return response.status(200,'API: User credentials updated',res);
+    }
+    catch(error)
+    {
+        return response.status(400,error.message,res);
+    }
+}
+
+exports.putTheme = async (req,res) =>
+{
+    try
+    {
+        if (!req.user) return response.status(401,'API: Auth required',res);
+
+        const putThemeResult = await queryPromise('UPDATE `users` SET `theme` = ?, `custom_theme` = ? WHERE `login` = ?',[req.body.theme,req.body.customTheme, req.user.login]);
+        if (!putThemeResult.affectedRows) return response.status(304,'API: User theme not modified',res);
+
+        return response.status(200,'API: User theme updated',res);
     }
     catch(error)
     {

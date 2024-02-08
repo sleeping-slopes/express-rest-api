@@ -24,7 +24,11 @@ exports.logIn = async (req,res) =>
             return response.status(401,error,res);
         }
         const token = jwt.sign({ login: user.login },config.JWTSECRET);
-        return response.status(200,{token: "Bearer " + token},res);
+        const currentUser = await queryPromise('SELECT `login`, `email`,`custom_theme`, `theme`, `profile_picture` FROM `users` WHERE `login` = ?',[user.login]);
+        if (currentUser.length<1) return response.status(404,'API: User not found',res);
+        const loginData = { loginData: {authJWT: "Bearer " + token, user: currentUser[0]} };
+
+        return response.status(200,loginData,res);
     }
     catch(error)
     {

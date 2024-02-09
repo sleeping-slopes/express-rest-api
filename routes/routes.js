@@ -22,6 +22,8 @@ module.exports = (app) =>
     app.route("/api/me/banner").post(middleware.authToken, upload.single('userBanner'), meController.postBanner);
     app.route("/api/me/banner").delete(middleware.authToken,  meController.deleteBanner);
 
+    app.route("/api/me/songs").post(middleware.authToken, upload.fields([{name: 'songAudio'},{name: 'songCover'}]), meController.postSong);
+
     app.route("/api/me/songs/likes").post(middleware.authToken, meController.postSongLike);
     app.route("/api/me/songs/likes/:id").delete(middleware.authToken, meController.deleteSongLike);
 

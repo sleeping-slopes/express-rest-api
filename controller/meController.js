@@ -97,6 +97,67 @@ exports.putProfile = async (req,res) =>
     }
 }
 
+exports.postSong = async (req,res) =>
+{
+    try
+    {
+        if (!req.user?.login) return response.status(401,"API: Auth required",res);
+        const song = JSON.parse(req.body.songJSON);
+
+        const error = { artistsError:[] };
+
+        const userExistsPromises = song.artists.map
+        (
+            async (artist,index) =>
+            {
+                if (artist.login)
+                {
+                    const userExists = await queryPromise('SELECT EXISTS (SELECT 1 FROM `users` WHERE `login` = ?) AS `exists`',[artist.login]);
+                    if (!userExists[0].exists)
+                    {
+                        error.artistsError.push({index: index, message: "User not found."});
+                    }
+                }
+            }
+        )
+        await Promise.all(userExistsPromises);
+
+        if (error.artistsError.length>0) return response.status(400,error,res);
+
+        const audiosrc = req.files.songAudio?.[0].filename;
+        const coversrc = req.files.songCover?.[0].filename;
+        const postSongParams = [song.name, audiosrc, coversrc, 322, new Date().toISOString().slice(0, 19).replace('T', ' '), req.user.login];
+        const postSongSQL = "INSERT INTO `songs` (`name`, `audiosrc`, `cover`, `duration`, `created_at`, `created_by`) VALUES (?, ?, ?, ?, ?, ?)";
+        const postSongResult = await queryPromise(postSongSQL,postSongParams);
+
+        const addSongArtistsPromises = song.artists.map
+        (
+            async (artist,index) =>
+            {
+                const addSongArtistSQL = "INSERT INTO `song_artists` (`songID`, `artistLogin`, `artistName`, `artistSongPosition`) VALUES (?, ?, ?, ?)";
+                const addSongArtistResult = await queryPromise(addSongArtistSQL,[postSongResult.insertId,artist.login,artist.pseudoname,index]);
+            }
+        )
+        await Promise.all(addSongArtistsPromises);
+
+        const addSongTagsPromises = song.tags.map
+        (
+            async (tag) =>
+            {
+                const addSongTagSQL = "INSERT INTO `audioplayerdb`.`song_tags` (`songID`, `tag`) VALUES (?, ?)";
+                const addSongTagResult = await queryPromise(addSongTagSQL,[postSongResult.insertId,tag]);
+            }
+        )
+        await Promise.all(addSongTagsPromises);
+
+        return response.status(201,'API: Song posted',res);
+    }
+    catch(error)
+    {
+        return response.status(400,error.message,res);
+    }
+}
+
 exports.postSongLike = async (req,res) =>
 {
     try

@@ -1,6 +1,7 @@
 const response = require('./../response')
 const queryPromise = require('../settings/database')
 const fs = require('fs')
+const { getAudioDurationInSeconds } = require('get-audio-duration')
 
 exports.getMe = async (req,res) =>
 {
@@ -127,7 +128,8 @@ exports.postSong = async (req,res) =>
 
         const audiosrc = req.files.songAudio?.[0].filename;
         const coversrc = req.files.songCover?.[0].filename;
-        const postSongParams = [song.name, audiosrc, coversrc, 322, new Date().toISOString().slice(0, 19).replace('T', ' '), req.user.login];
+        const duration = Math.floor(await getAudioDurationInSeconds(req.files.songAudio?.[0].path));
+        const postSongParams = [song.name, audiosrc, coversrc, duration, new Date().toISOString().slice(0, 19).replace('T', ' '), req.user.login];
         const postSongSQL = "INSERT INTO `songs` (`name`, `audiosrc`, `cover`, `duration`, `created_at`, `created_by`) VALUES (?, ?, ?, ?, ?, ?)";
         const postSongResult = await queryPromise(postSongSQL,postSongParams);
 

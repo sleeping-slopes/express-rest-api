@@ -1,5 +1,6 @@
 const response = require('./../response')
 const queryPromise = require('../settings/database')
+const fs = require('fs')
 
 exports.getMe = async (req,res) =>
 {
@@ -269,6 +270,13 @@ exports.postProfilePicture = async (req,res) =>
     {
         if (!req.user?.login) return response.status(401,"API: Auth required",res);
 
+        const profilePicture = await queryPromise("SELECT `profile_picture` FROM `users` WHERE `login` = ?",[req.user.login]);
+        if (profilePicture[0].profile_picture)
+        {
+            var filePath = 'upload/images/user images/profile pictures/'+profilePicture[0].profile_picture;
+            fs.unlink(filePath, (error) => { if (error) { console.log(error); } } );
+        }
+
         const postProfilePictureResult = await queryPromise("UPDATE `users` SET `profile_picture` = ? WHERE `login` = ?",[req.file.filename,req.user.login]);
 
         return response.status(200,'API: User profile picture updated',res);
@@ -284,6 +292,13 @@ exports.deleteProfilePicture = async (req,res) =>
     try
     {
         if (!req.user?.login) return response.status(401,"API: Auth required",res);
+
+        const profilePicture = await queryPromise("SELECT `profile_picture` FROM `users` WHERE `login` = ?",[req.user.login]);
+        if (profilePicture[0].profile_picture)
+        {
+            var filePath = 'upload/images/user images/profile pictures/'+profilePicture[0].profile_picture;
+            fs.unlink(filePath, (error) => { if (error) { console.log(error); } } );
+        }
 
         const deleteProfilePictureResult = await queryPromise("UPDATE `users` SET `profile_picture` = ? WHERE `login` = ?",[null, req.user.login]);
 
@@ -301,6 +316,13 @@ exports.postBanner = async (req,res) =>
     {
         if (!req.user?.login) return response.status(401,"API: Auth required",res);
 
+        const bannerPicture = await queryPromise("SELECT `banner` FROM `users` WHERE `login` = ?",[req.user.login]);
+        if (bannerPicture[0].banner)
+        {
+            var filePath = 'upload/images/user images/banners/'+bannerPicture[0].banner;
+            fs.unlink(filePath, (error) => { if (error) { console.log(error); } } );
+        }
+
         const postBannerResult = await queryPromise("UPDATE `users` SET `banner` = ? WHERE `login` = ?",[req.file.filename,req.user.login]);
 
         return response.status(200,'API: User banner updated',res);
@@ -316,6 +338,13 @@ exports.deleteBanner = async (req,res) =>
     try
     {
         if (!req.user?.login) return response.status(401,"API: Auth required",res);
+
+        const bannerPicture = await queryPromise("SELECT `banner` FROM `users` WHERE `login` = ?",[req.user.login]);
+        if (bannerPicture[0].banner)
+        {
+            var filePath = 'upload/images/user images/banners/'+bannerPicture[0].banner;
+            fs.unlink(filePath, (error) => { if (error) { console.log(error); } } );
+        }
 
         const deleteBannerResult = await queryPromise("UPDATE `users` SET `banner` = ? WHERE `login` = ?",[null,req.user.login]);
 

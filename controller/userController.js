@@ -95,6 +95,8 @@ exports.getAllSongs = async (req,res) =>
 {
     try
     {
+        const playlist = { id:'[API] '+req.params.login+"\'S ALL SONGS", name:req.params.login+"\'s all songs", artists:[{name:"Auto generated"}] };
+
         const getUserAllSongsSQL = "SELECT `id`, ROW_NUMBER() OVER(PARTITION BY null) - 1 AS `pos` FROM\
         (SELECT DISTINCT `id` FROM\
         (SELECT `id` as `id`, `created_at` as `time` FROM `songs` WHERE `created_by` = ?\
@@ -102,9 +104,10 @@ exports.getAllSongs = async (req,res) =>
         UNION SELECT `songID` as `id`, `time` FROM `song_likes` WHERE `userLogin` = ?) as a\
         ORDER BY `time` DESC) as b";
         const songs = await queryPromise(getUserAllSongsSQL,[req.params.login,req.params.login,req.params.login]);
-        if (songs.length<1) return response.status(404,'API: User has not created or liked any song yet',res);
-        // WIP
-        return response.status(200,{id:'API '+req.params.login+" ALL",songs:songs},res);
+        if (songs.length<1) playlist.songList = {error:{status:"404", message:"API: User has not created or liked any song yet"}};
+        else playlist.songList = { id: playlist.id, songs: songs };
+
+        return response.status(200, playlist, res);
     }
     catch(error)
     {
@@ -116,31 +119,18 @@ exports.getCreatedSongs = async (req,res) =>
 {
     try
     {
-        const getUserCreatedSongsSQL = "SELECT `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `created_at` DESC) - 1 AS `pos` FROM `view_song` WHERE `id` IN\
-        (SELECT `id` as `id` FROM `songs` WHERE `created_by` = ?\
-        UNION SELECT DISTINCT `songID` as `id` FROM `view_song_artists` WHERE `login` = ?)";
-        const songs = await queryPromise(getUserCreatedSongsSQL,[req.params.login,req.params.login]);
-        if (songs.length<1) return response.status(404,'API: User has not created any song yet',res);
-        // WIP
-        return response.status(200,{id:'API '+req.params.login+" created",songs:songs},res);
-    }
-    catch(error)
-    {
-        return response.status(400,error.message,res);
-    }
-}
+        const orderColumn =  (req.query["popular"] || req.query["popular"]==="")?"likes_count":"created_at";
 
-exports.getCreatedPopularSongs = async (req,res) =>
-{
-    try
-    {
-        const getUserCreatedPopularSongsSQL = "SELECT `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `likes_count` DESC) - 1 AS `pos` FROM `view_song` WHERE `id` IN\
+        const playlist = { id:'[API] '+req.params.login+"\'S CREATED SONGS", name:req.params.login+"\'s created songs", artists:[{name:"Auto generated"}] };
+
+        const getUserCreatedSongsSQL = "SELECT `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY ?? DESC) - 1 AS `pos` FROM `view_song` WHERE `id` IN\
         (SELECT `id` as `id` FROM `songs` WHERE `created_by` = ?\
-        UNION SELECT DISTINCT `songID` as `id` FROM `view_song_artists` WHERE `login` = ?)";
-        const songs = await queryPromise(getUserCreatedPopularSongsSQL,[req.params.login,req.params.login]);
-        if (songs.length<1) return response.status(404,'API: User has not created any song yet',res);
-        // WIP
-        return response.status(200,{id:'API '+req.params.login+" created popular",songs:songs},res);
+        UNION SELECT DISTINCT `songID` as `id` FROM `song_artists` WHERE `artistLogin` = ?)";
+        const songs = await queryPromise(getUserCreatedSongsSQL,[orderColumn,req.params.login,req.params.login]);
+        if (songs.length<1) playlist.songList = {error:{status:"404", message:"API: User has not created any song yet"}};
+        else playlist.songList = { id: playlist.id, songs: songs };
+
+        return response.status(200,playlist,res);
     }
     catch(error)
     {
@@ -152,11 +142,14 @@ exports.getSongLikes = async (req,res) =>
 {
     try
     {
+        const playlist = { id:'[API] '+req.params.login+"\'S LIKED SONGS", name:req.params.login+"\'s liked songs", artists:[{name:"Auto generated"}] };
+
         const getUserSongLikesSQL = 'SELECT `songID` as `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `song_likes`.`time` DESC) - 1 AS `pos` FROM `song_likes` WHERE `userLogin` = ?';
         const songs = await queryPromise(getUserSongLikesSQL,[req.params.login]);
-        if (songs.length<1) return response.status(404,'API: User has not liked any song yet',res);
-        // WIP
-        return response.status(200,{id:'API '+req.params.login+" liked",songs:songs},res);
+        if (songs.length<1) playlist.songList = {error:{status:"404", message:"API: User has not liked any song yet"}};
+        else playlist.songList = { id: playlist.id, songs: songs };
+
+        return response.status(200,playlist,res);
     }
     catch(error)
     {
@@ -189,29 +182,13 @@ exports.getCreatedPlaylists = async (req,res) =>
 {
     try
     {
-        const getUserCreatedPlaylistsSQL = "SELECT `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `created_at` DESC) - 1 AS `pos` FROM `view_playlist` WHERE `id` IN\
-        (SELECT `id` as `id` FROM `playlists` WHERE `created_by` = ?\
-        UNION SELECT DISTINCT `playlistID` as `id` FROM `view_playlist_artists` WHERE `login` = ?)";
-        const playlists = await queryPromise(getUserCreatedPlaylistsSQL,[req.params.login,req.params.login]);
-        if (playlists.length<1) return response.status(404,'API: User has not created any playlist yet',res);
-        return response.status(200,playlists,res);
-    }
-    catch(error)
-    {
-        return response.status(400,error.message,res);
-    }
-}
+        const orderColumn =  (req.query["popular"] || req.query["popular"]==="")?"likes_count":"created_at";
 
-exports.getCreatedPopularPlaylists = async (req,res) =>
-{
-    try
-    {
-        const getUserCreatedPopularPlaylistsSQL = "SELECT `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `likes_count` DESC) - 1 AS `pos` FROM `view_playlist` WHERE `id` IN\
+        const getUserCreatedPlaylistsSQL = "SELECT `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY ?? DESC) - 1 AS `pos` FROM `view_playlist` WHERE `id` IN\
         (SELECT `id` as `id` FROM `playlists` WHERE `created_by` = ?\
-        UNION SELECT DISTINCT `playlistID` as `id` FROM `view_playlist_artists` WHERE `login` = ?)";
-        const playlists = await queryPromise(getUserCreatedPopularPlaylistsSQL,[req.params.login,req.params.login]);
+        UNION SELECT DISTINCT `playlistID` as `id` FROM `playlist_artists` WHERE `artistLogin` = ?)";
+        const playlists = await queryPromise(getUserCreatedPlaylistsSQL,[orderColumn,req.params.login,req.params.login]);
         if (playlists.length<1) return response.status(404,'API: User has not created any playlist yet',res);
-
         return response.status(200,playlists,res);
     }
     catch(error)

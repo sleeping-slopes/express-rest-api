@@ -5,10 +5,13 @@ exports.getAll = async (req,res) =>
 {
     try
     {
-        const songs = await queryPromise("SELECT `id`,ROW_NUMBER() OVER(PARTITION BY null ORDER BY `songs`.`created_at` DESC) - 1 AS `pos` FROM `songs`");
-        if (songs.length<1) return response.status(404,'API: Songs not found',res);
+        const playlist = { id:'[API] ALL SONGS', name:"All songs", artists:[{name:"Auto generated"}] };
 
-        return response.status(200,{id:'API GET ALL',songs:songs},res);
+        const songs = await queryPromise("SELECT `id`,ROW_NUMBER() OVER(PARTITION BY null ORDER BY `songs`.`created_at` DESC) - 1 AS `pos` FROM `songs`");
+        if (songs.length<1) playlist.songList = {error:{status:"404", message:"API: Songs not found"}};
+        else playlist.songList = { id: playlist.id, songs: songs };
+
+        return response.status(200,playlist,res);
     }
     catch(error)
     {
@@ -128,11 +131,14 @@ exports.getRelated = async (req,res) =>
 {
     try
     {
+        const playlist = { id:'[API] SONG ID'+req.params.id+' RELATED', name:"Songs related to id"+req.params.id, artists:[{name:"Auto generated"}] };
+
         const getRelatedSongsSQL ="SELECT `songs`.`id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY count(`songs`.`id`) DESC) - 1 AS `pos` from `songs` INNER JOIN `song_tags` on `song_tags`.`songID` = `songs`.`id` WHERE `song_tags`.`tag` in (SELECT `tag` FROM `song_tags` WHERE `song_tags`.`songID`=?) AND `songs`.`id`!=? GROUP BY (`songs`.`id`)";
         const songs = await queryPromise(getRelatedSongsSQL,[req.params.id,req.params.id]);
-        if (songs.length<1) return response.status(404,'API: Related songs not found',res);
+        if (songs.length<1) playlist.songList = {error:{status:"404", message:"API: Related songs not found"}};
+        else playlist.songList = { id: playlist.id, songs: songs };
 
-        return response.status(200,{id:'API GET RELATED '+req.params.id,songs:songs},res);
+        return response.status(200,playlist,res);
     }
     catch(error)
     {
@@ -140,31 +146,20 @@ exports.getRelated = async (req,res) =>
     }
 }
 
-exports.getTaggedPopular = async (req,res) =>
+exports.getTaggedSongs = async (req,res) =>
 {
     try
     {
-        const getTaggedPopularSongsSQL = "SELECT `view_song`.`id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `view_song`.`likes_count` DESC) - 1 AS `pos` FROM `song_tags` INNER JOIN `view_song` on `song_tags`.`songID` = `view_song`.`id` WHERE `song_tags`.`tag` = ?";
-        const songs = await queryPromise(getTaggedPopularSongsSQL,[req.params.tag]);
-        if (songs.length<1) return response.status(404,'API: Songs tagged #'+req.params.tag+' not found',res);
+        const orderColumn =  (req.query["popular"] || req.query["popular"]==="")?"likes_count":"created_at";
 
-        return response.status(200,{id:'API TAGGED '+req.params.tag+' POPULAR',songs:songs},res);
-    }
-    catch(error)
-    {
-        return response.status(400,error.message,res);
-    }
-}
+        const playlist = { id:'[API] TAGGED #'+req.params.tag, name:"Songs tagged #"+req.params.tag, artists:[{name:"Auto generated"}] };
 
-exports.getTaggedNew = async (req,res) =>
-{
-    try
-    {
-        const getTaggedNewSongsSQL = "SELECT `view_song`.`id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `view_song`.`created_at` DESC) - 1 AS `pos` FROM `song_tags` INNER JOIN `view_song` on `song_tags`.`songID` = `view_song`.`id` WHERE `song_tags`.`tag` = ?";
-        const songs = await queryPromise(getTaggedNewSongsSQL,[req.params.tag]);
-        if (songs.length<1) return response.status(404,'API: Songs tagged #'+req.params.tag+' not found',res);
+        const getTaggedPopularSongsSQL = "SELECT `view_song`.`id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY ?? DESC) - 1 AS `pos` FROM `song_tags` INNER JOIN `view_song` ON `song_tags`.`songID` = `view_song`.`id` WHERE `song_tags`.`tag` = ?";
+        const songs = await queryPromise(getTaggedPopularSongsSQL,[orderColumn,req.params.tag]);
+        if (songs.length<1) playlist.songList = {error:{status:"404", message:'API: Songs tagged #'+req.params.tag+' not found'}};
+        else playlist.songList = { id: playlist.id, songs: songs };
 
-        return response.status(200,{id:'API TAGGED '+req.params.tag+' NEW',songs:songs},res);
+        return response.status(200,playlist,res);
     }
     catch(error)
     {

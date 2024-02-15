@@ -8,11 +8,9 @@ module.exports = (app) =>
 
     const meController = require('../controller/meController');
     app.route("/api/me").get(middleware.authToken, meController.getMe);
-
     app.route("/api/me").delete(middleware.authToken, meController.deleteMe);
 
     app.route("/api/me/profile").put(middleware.authToken, meController.putProfile);
-
     app.route("/api/me/theme").put(middleware.authToken, meController.putTheme);
     app.route("/api/me/credentials").put(middleware.authToken, meController.putCredentials);
 
@@ -22,7 +20,7 @@ module.exports = (app) =>
     app.route("/api/me/banner").post(middleware.authToken, upload.single('userBanner'), meController.postBanner);
     app.route("/api/me/banner").delete(middleware.authToken,  meController.deleteBanner);
 
-    app.route("/api/me/songs").post(middleware.authToken, upload.fields([{name: 'songAudio'},{name: 'songCover'}]), meController.postSong);
+    app.route("/api/me/songs/created").post(middleware.authToken, upload.fields([{name: 'songAudio'},{name: 'songCover'}]), meController.postSong);
 
     app.route("/api/me/songs/likes").post(middleware.authToken, meController.postSongLike);
     app.route("/api/me/songs/likes/:id").delete(middleware.authToken, meController.deleteSongLike);
@@ -45,8 +43,7 @@ module.exports = (app) =>
     app.route("/api/songs/:id/related").get(songController.getRelated);
     app.route("/api/songs/:id/likes").get(songController.getLikes);
 
-    app.route("/api/tags/:tag/popular").get(songController.getTaggedPopular);
-    app.route("/api/tags/:tag/new").get(songController.getTaggedNew);
+    app.route("/api/tags/:tag").get(songController.getTaggedSongs);
 
     const playlistController = require('./../controller/playlistController');
     app.route('/api/playlists').get(playlistController.getAll);
@@ -63,11 +60,9 @@ module.exports = (app) =>
 
     app.route("/api/users/:login/songs").get(userController.getAllSongs);
     app.route("/api/users/:login/songs/created").get(userController.getCreatedSongs);
-    app.route("/api/users/:login/songs/created/popular").get(userController.getCreatedPopularSongs);
     app.route("/api/users/:login/songs/likes").get(userController.getSongLikes);
     app.route("/api/users/:login/playlists").get(userController.getAllPlaylists);
     app.route("/api/users/:login/playlists/created").get(userController.getCreatedPlaylists);
-    app.route("/api/users/:login/playlists/created/popular").get(userController.getCreatedPopularPlaylists);
     app.route("/api/users/:login/playlists/likes").get(userController.getPlaylistLikes);
     app.route("/api/users/:login/followers").get(userController.getFollowers);
     app.route("/api/users/:login/following").get(userController.getFollowing);

@@ -9,6 +9,7 @@ exports.status = (status, values,res) =>
     }
     catch(error)
     {
-        console.log("error:"+error);
+        console.log("RESPONSE.JS ERROR ON URL:"+res.req.url);
+        console.log(error);
     }
 }

@@ -108,7 +108,7 @@ exports.postSong = async (req,res) =>
 
         const error = { artistsError:[] };
 
-        const userExistsPromises = song.artists.map
+        const artistExistsPromises = song.artists.map
         (
             async (artist,index) =>
             {
@@ -122,7 +122,7 @@ exports.postSong = async (req,res) =>
                 }
             }
         )
-        await Promise.all(userExistsPromises);
+        await Promise.all(artistExistsPromises);
 
         if (error.artistsError.length>0) return response.status(400,error,res);
 
@@ -255,7 +255,7 @@ exports.deleteFollowing = async (req,res) =>
         if (!req.user?.login) return response.status(401,"API: Auth required",res);
 
         const deleteUserFollowingSQL = 'DELETE FROM `user_follows` WHERE `user_login`=? AND `user_follower_login`=?';
-        const deleteUserFollowingResult = await queryPromise(deleteUserFollowSQL,[req.params.login,req.user.login]);
+        const deleteUserFollowingResult = await queryPromise(deleteUserFollowingSQL,[req.params.login,req.user.login]);
         if (!deleteUserFollowingResult.affectedRows) return response.status(404,'API: Following not found',res);
 
         return response.status(204,'API: Following deleted',res);

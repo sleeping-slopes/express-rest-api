@@ -75,11 +75,11 @@ exports.getProfile = async (req,res) =>
             if (req.user.login==req.params.login) user.me=true;
             else
             {
-                const userYouFollow = await queryPromise('SELECT * FROM `user_follows` WHERE `user_login` = ? AND `user_follower_login` = ?',[req.params.login,req.user.login]);
-                user.youFollow = userYouFollow.length>0;
+                const userFollowingExists = await queryPromise('SELECT EXISTS (SELECT 1 FROM `user_follows` WHERE `user_login` = ? AND `user_follower_login` = ?) AS `exists`',[req.params.login,req.user.login]);
+                user.youFollow = !!userFollowingExists[0].exists;
 
-                const userFollowsYou = await queryPromise('SELECT * FROM `user_follows` WHERE `user_login` = ? AND `user_follower_login` = ?',[req.user.login,req.params.login]);
-                user.followsYou = userFollowsYou.length>0;
+                const userFollowExists = await queryPromise('SELECT EXISTS (SELECT 1 FROM `user_follows` WHERE `user_login` = ? AND `user_follower_login` = ?) AS `exists`',[req.user.login,req.params.login]);
+                user.followsYou = !!userFollowExists[0].exists;
             }
         }
 
@@ -129,7 +129,6 @@ exports.getCreatedSongs = async (req,res) =>
         const songs = await queryPromise(getUserCreatedSongsSQL,[orderColumn,req.params.login,req.params.login]);
         if (songs.length<1) playlist.songList = {error:{status:"404", message:"API: User has not created any song yet"}};
         else playlist.songList = { id: playlist.id, songs: songs };
-
         return response.status(200,playlist,res);
     }
     catch(error)
@@ -166,7 +165,7 @@ exports.getAllPlaylists = async (req,res) =>
         UNION SELECT `playlistID` as `id`,`created_at` as `time` FROM `view_playlist_artists` WHERE `login` = ?\
         UNION SELECT `playlistID` as `id`,`time` FROM `playlist_likes` WHERE `userLogin` = ?\
         ) as a\
-        ORDER by `time` DESC"
+        ORDER by `time` DESC";
         let playlists = await queryPromise(getUserAllPlaylistsSQL,[req.params.login,req.params.login,req.params.login]);
         if (playlists.length<1) playlists = {error:{status:404,message:"API: User has not created or liked any playlist yet"}};
 
@@ -189,6 +188,7 @@ exports.getCreatedPlaylists = async (req,res) =>
         UNION SELECT DISTINCT `playlistID` as `id` FROM `playlist_artists` WHERE `artistLogin` = ?)";
         let playlists = await queryPromise(getUserCreatedPlaylistsSQL,[orderColumn,req.params.login,req.params.login]);
         if (playlists.length<1) playlists = {error:{status:404,message:"API: User has not created any playlist yet"}};
+
         return response.status(200,playlists,res);
     }
     catch(error)

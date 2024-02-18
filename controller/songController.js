@@ -44,10 +44,11 @@ exports.getByID = async (req,res) =>
 
         const songTags = await queryPromise('SELECT `tag` FROM `song_tags` WHERE `songID` = ?',[req.params.id]);
         song.tags = songTags;
+
         if (req.user)
         {
-            const songYouLiked = await queryPromise('SELECT `id` FROM `song_likes` WHERE `songID` = ? AND `userLogin` = ?',[req.params.id,req.user.login]);
-            song.liked = songYouLiked.length>0;
+            const songLikeExists = await queryPromise('SELECT EXISTS (SELECT 1 FROM `song_likes` WHERE `songID` = ? AND `userLogin` = ?) AS `exists`',[req.params.id,req.user.login]);
+            song.liked = !!songLikeExists[0].exists;
         }
         else song.liked = false;
 

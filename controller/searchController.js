@@ -25,8 +25,8 @@ exports.getPlaylists = async (req,res) =>
     try
     {
         const getPlaylistByNameSQL ="SELECT `id` FROM `view_playlist` WHERE `name` LIKE ? OR `id` LIKE ? ORDER BY `likes_count` DESC";
-        const playlists = await queryPromise(getPlaylistByNameSQL,['%'+req.params.q+'%','%'+req.params.q+'%']);
-        if (playlists.length<1) return response.status(404,'Sorry, we didn\'t find any results for “'+req.params.q+'”',res);
+        let playlists = await queryPromise(getPlaylistByNameSQL,['%'+req.params.q+'%','%'+req.params.q+'%']);
+        if (playlists.length<1) playlists = {error:{status:404,message:'Sorry, we didn\'t find any results for “'+req.params.q+'”'}};
 
         return response.status(200,playlists,res);
     }
@@ -41,8 +41,8 @@ exports.getUsers = async (req,res) =>
     try
     {
         const getUserByLoginUsernamePseudonameSQL = "SELECT  DISTINCT `login` FROM `view_user_profile` LEFT JOIN `playlist_artists` ON `playlist_artists`.`artistLogin`=`view_user_profile`.`login` LEFT JOIN `song_artists` ON `song_artists`.`artistLogin`=`view_user_profile`.`login` WHERE `view_user_profile`.`login` LIKE ? OR `view_user_profile`.`username` LIKE ? OR `playlist_artists`.`artistName` LIKE ? OR `song_artists`.`artistName` LIKE ? ORDER BY `view_user_profile`.`followers_count` DESC";
-        const users = await queryPromise(getUserByLoginUsernamePseudonameSQL,Array(4).fill('%'+req.params.q+'%'));
-        if (users.length<1) return response.status(404,'Sorry, we didn\'t find any results for “'+req.params.q+'”',res);
+        let users = await queryPromise(getUserByLoginUsernamePseudonameSQL,Array(4).fill('%'+req.params.q+'%'));
+        if (users.length<1) users = {error:{status:404,message:'Sorry, we didn\'t find any results for “'+req.params.q+'”'}};
 
         return response.status(200,users,res);
     }

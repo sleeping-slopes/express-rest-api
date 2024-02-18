@@ -5,8 +5,8 @@ exports.getAll = async (req,res) =>
 {
     try
     {
-        const playlists = await queryPromise("SELECT `id` FROM `playlists` ORDER BY `playlists`.`created_at` DESC");
-        if (playlists.length<1) return response.status(404,'API: Playlists not found',res);
+        let playlists = await queryPromise("SELECT `id` FROM `playlists` ORDER BY `playlists`.`created_at` DESC");
+        if (playlists.length<1) playlists = {error:{status:404,message:'API: Playlists not found'}};
 
         return response.status(200,playlists,res);
     }
@@ -46,8 +46,8 @@ exports.getByID = async (req,res) =>
 
         if (req.user)
         {
-            const playlistYouLiked = await queryPromise('SELECT `id` FROM `playlist_likes` WHERE `playlistID` = ? AND `userLogin` = ?',[playlist.id,req.user.login]);
-            playlist.liked = playlistYouLiked.length>0;
+            const playlistLikeExists = await queryPromise('SELECT EXISTS (SELECT 1 FROM `playlist_likes` WHERE `playlistID` = ? AND `userLogin` = ?) AS `exists`',[req.params.id,req.user.login]);
+            playlist.liked = !!playlistLikeExists[0].exists;
         }
         else playlist.liked = false;
 

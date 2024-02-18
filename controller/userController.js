@@ -167,8 +167,8 @@ exports.getAllPlaylists = async (req,res) =>
         UNION SELECT `playlistID` as `id`,`time` FROM `playlist_likes` WHERE `userLogin` = ?\
         ) as a\
         ORDER by `time` DESC"
-        const playlists = await queryPromise(getUserAllPlaylistsSQL,[req.params.login,req.params.login,req.params.login]);
-        if (playlists.length<1) return response.status(404,'API: User has not created or liked any playlist yet',res);
+        let playlists = await queryPromise(getUserAllPlaylistsSQL,[req.params.login,req.params.login,req.params.login]);
+        if (playlists.length<1) playlists = {error:{status:404,message:"API: User has not created or liked any playlist yet"}};
 
         return response.status(200,playlists,res);
     }
@@ -187,8 +187,8 @@ exports.getCreatedPlaylists = async (req,res) =>
         const getUserCreatedPlaylistsSQL = "SELECT `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY ?? DESC) - 1 AS `pos` FROM `view_playlist` WHERE `id` IN\
         (SELECT `id` as `id` FROM `playlists` WHERE `created_by` = ?\
         UNION SELECT DISTINCT `playlistID` as `id` FROM `playlist_artists` WHERE `artistLogin` = ?)";
-        const playlists = await queryPromise(getUserCreatedPlaylistsSQL,[orderColumn,req.params.login,req.params.login]);
-        if (playlists.length<1) return response.status(404,'API: User has not created any playlist yet',res);
+        let playlists = await queryPromise(getUserCreatedPlaylistsSQL,[orderColumn,req.params.login,req.params.login]);
+        if (playlists.length<1) playlists = {error:{status:404,message:"API: User has not created any playlist yet"}};
         return response.status(200,playlists,res);
     }
     catch(error)
@@ -202,8 +202,8 @@ exports.getPlaylistLikes = async (req,res) =>
     try
     {
         const getPlaylistLikesSQL = "SELECT `playlistID` as `id` FROM `playlist_likes` WHERE `userLogin` = ? ORDER BY `playlist_likes`.`time` DESC";
-        const playlists = await queryPromise(getPlaylistLikesSQL,[req.params.login]);
-        if (playlists.length<1) return response.status(404,'API: User has not liked any playlist yet',res);
+        let playlists = await queryPromise(getPlaylistLikesSQL,[req.params.login]);
+        if (playlists.length<1) playlists = {error:{status:404,message:"API: User has not liked any playlist yet"}};
 
         return response.status(200,playlists,res);
     }
@@ -255,8 +255,8 @@ exports.getFollowers = async (req,res) =>
 {
     try
     {
-        const userFollowers = await queryPromise("SELECT `user_follower_login` as `login` FROM `user_follows` WHERE `user_login` = ? ORDER BY `time` DESC",[req.params.login]);
-        if (userFollowers.length<1) return response.status(404,'API: User has not any followers yet',res);
+        let userFollowers = await queryPromise("SELECT `user_follower_login` as `login` FROM `user_follows` WHERE `user_login` = ? ORDER BY `time` DESC",[req.params.login]);
+        if (userFollowers.length<1) userFollowers = {error:{status:404,message:"API: User has not any followers yet"}};
 
         return response.status(200,userFollowers,res);
     }
@@ -270,8 +270,8 @@ exports.getFollowing = async (req,res) =>
 {
     try
     {
-        const userFollowings = await queryPromise("SELECT `user_login` as `login` FROM `user_follows` WHERE `user_follower_login` = ? ORDER BY `time` DESC",[req.params.login]);
-        if (userFollowings.length<1) return response.status(404,'API: User has not following anyone yet',res);
+        let userFollowings = await queryPromise("SELECT `user_login` as `login` FROM `user_follows` WHERE `user_follower_login` = ? ORDER BY `time` DESC",[req.params.login]);
+        if (userFollowings.length<1) userFollowings = {error:{status:404,message:"API: User has not following anyone yet"}};
 
         return response.status(200,userFollowings,res);
     }

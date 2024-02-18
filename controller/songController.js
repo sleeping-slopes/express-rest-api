@@ -101,8 +101,8 @@ exports.getLikes = async (req,res) =>
 {
     try
     {
-        const songLikes = await queryPromise("SELECT `userLogin` as `login` FROM `song_likes` WHERE `songID` = ? ORDER BY `time` DESC",[req.params.id]);
-        if (songLikes.length<1) return response.status(404,'API: No one liked this song yet',res);
+        let songLikes = await queryPromise("SELECT `userLogin` as `login` FROM `song_likes` WHERE `songID` = ? ORDER BY `time` DESC",[req.params.id]);
+        if (songLikes.length<1) songLikes = {error:{status:404,message:'API: No one liked this song yet'}};
 
         return response.status(200,songLikes,res);
     }
@@ -116,8 +116,8 @@ exports.getPlaylists = async (req,res) =>
 {
     try
     {
-        const songPlaylists = await queryPromise("SELECT DISTINCT `playlistID` as `id` FROM `playlist_songs` WHERE `songID` = ?",[req.params.id]);
-        if (songPlaylists.length<1) return response.status(404,'API: No one added this song to playlist yet',res);
+        let songPlaylists = await queryPromise("SELECT DISTINCT `playlistID` as `id` FROM `playlist_songs` WHERE `songID` = ?",[req.params.id]);
+        if (songPlaylists.length<1) songPlaylists = {error:{status:404,message:'API: No one added this song to playlist yet'}};
 
         return response.status(200,songPlaylists,res);
     }

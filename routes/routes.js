@@ -31,6 +31,8 @@ module.exports = (app) =>
     app.route("/api/me/users/following").post(middleware.authToken, meController.postFollowing);
     app.route("/api/me/users/following/:login").delete(middleware.authToken, meController.deleteFollowing);
 
+    app.route("/api/me/recommendations").get(middleware.authToken, meController.getRecommendations);
+
     const authController = require('../controller/authController');
     app.route('/api/auth/login').post(authController.logIn);
 

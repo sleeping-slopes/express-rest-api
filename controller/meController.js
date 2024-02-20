@@ -357,3 +357,21 @@ exports.deleteBanner = async (req,res) =>
         return response.status(400,error.message,res);
     }
 }
+
+exports.getRecommendations = async (req,res) =>
+{
+    try
+    {
+        if (!req.user?.login) return response.status(401,"API: Auth required",res);
+        const recommendedArtistsSQL = "SELECT `login` FROM `view_user_profile` WHERE `songs_count`>0 AND `login`<>? AND `login` NOT IN\
+        (SELECT `user_login` as `login` FROM `user_follows` WHERE `user_follower_login`=?) ORDER BY RAND() LIMIT 3";
+
+        let recommendedArtists = await queryPromise(recommendedArtistsSQL,[req.user.login,req.user.login]);
+        if (recommendedArtists.length<1) recommendedArtists = {error:{status:404,message:"API: No recommendations"}};
+        return response.status(200,recommendedArtists,res);
+    }
+    catch(error)
+    {
+        return response.status(400,error.message,res);
+    }
+}

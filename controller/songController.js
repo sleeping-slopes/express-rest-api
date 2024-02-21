@@ -134,7 +134,9 @@ exports.getRelated = async (req,res) =>
     {
         const playlist = { id:'[API] SONG ID'+req.params.id+' RELATED', name:"Songs related to id"+req.params.id, artists:[{name:"Auto generated"}] };
 
-        const getRelatedSongsSQL ="SELECT `songs`.`id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY count(`songs`.`id`) DESC) - 1 AS `pos` from `songs` INNER JOIN `song_tags` on `song_tags`.`songID` = `songs`.`id` WHERE `song_tags`.`tag` in (SELECT `tag` FROM `song_tags` WHERE `song_tags`.`songID`=?) AND `songs`.`id`!=? GROUP BY (`songs`.`id`)";
+        const getRelatedSongsSQL ="SELECT `songs`.`id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY count(`songs`.`id`) DESC) - 1 AS `pos` from `songs`\
+        INNER JOIN `song_tags` on `song_tags`.`songID` = `songs`.`id` WHERE `song_tags`.`tag` IN\
+        (SELECT `tag` FROM `song_tags` WHERE `song_tags`.`songID`=?) AND `songs`.`id`!=? GROUP BY (`songs`.`id`)";
         const songs = await queryPromise(getRelatedSongsSQL,[req.params.id,req.params.id]);
         if (songs.length<1) playlist.songList = {error:{status:"404", message:"API: Related songs not found"}};
         else playlist.songList = { id: playlist.id, songs: songs };

@@ -44,6 +44,13 @@ exports.putCredentials = async (req,res) =>
     {
         if (!req.user) return response.status(401,'API: Auth required',res);
 
+        const users = await queryPromise("SELECT `email` FROM `users` WHERE `email` =  ?", [req.body.email]);
+        if (users.length>0)
+        {
+            const error = { emailError: 'Account with this email already exists.' };
+            return response.status(409,error,res);
+        }
+
         const putCredentialsResult = await queryPromise('UPDATE `users` SET `email` = ? WHERE `login` = ?',[req.body.email, req.user.login]);
         if (!putCredentialsResult.affectedRows) return response.status(304,'API: User credentials not modified',res);
 

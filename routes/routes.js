@@ -12,6 +12,7 @@ module.exports = (app) =>
 
     app.route("/api/me/profile").put(middleware.authToken, meController.putProfile);
     app.route("/api/me/theme").put(middleware.authToken, meController.putTheme);
+    app.route("/api/me/accent-color").put(middleware.authToken, meController.putAccentColor);
     app.route("/api/me/credentials").put(middleware.authToken, meController.putCredentials);
 
     app.route("/api/me/profile-picture").post(middleware.authToken, upload.single('userProfilePicture'), meController.postProfilePicture);

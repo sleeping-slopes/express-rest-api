@@ -9,7 +9,7 @@ exports.getMe = async (req,res) =>
     {
         if (!req.user) return response.status(401,'API: Auth required',res);
 
-        const users = await queryPromise('SELECT `login`, `email`, `custom_theme`, `theme`, `profile_picture` FROM `users` WHERE `login` = ?',[req.user.login]);
+        const users = await queryPromise('SELECT `login`, `email`, `custom_theme`, `theme`, `accent_color`, `profile_picture` FROM `users` WHERE `login` = ?',[req.user.login]);
         if (users.length<1) return response.status(404,'API: User not found',res);
         const user = users[0];
 
@@ -65,6 +65,23 @@ exports.putTheme = async (req,res) =>
         if (!putThemeResult.affectedRows) return response.status(304,'API: User theme not modified',res);
 
         return response.status(200,'API: User theme updated',res);
+    }
+    catch(error)
+    {
+        return response.status(400,error.message,res);
+    }
+}
+
+exports.putAccentColor = async (req,res) =>
+{
+    try
+    {
+        if (!req.user) return response.status(401,'API: Auth required',res);
+
+        const putAccentColorResult = await queryPromise('UPDATE `users` SET `accent_color` = ? WHERE `login` = ?',[req.body.accentColor, req.user.login]);
+        if (!putAccentColorResult.affectedRows) return response.status(304,'API: User theme not modified',res);
+
+        return response.status(200,'API: User accent color updated',res);
     }
     catch(error)
     {

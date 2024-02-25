@@ -26,15 +26,16 @@ exports.getByID = async (req,res) =>
         const playlist = playlists[0];
         if (!playlist.name) playlist.name = "Unnamed playlist";
         playlist.cover=!!playlist.cover;
+        playlist.created_by_username = playlist.created_by_username || playlist.created_by;
 
         const getPlaylistSongsSQL = "SELECT `id`, ROW_NUMBER() OVER(PARTITION BY null ORDER BY `pos` ASC) - 1 AS `pos` FROM `view_playlist_songs` WHERE `playlistID` = ? ORDER BY `view_playlist_songs`.`pos`";
         const playlistSongs = await queryPromise(getPlaylistSongsSQL,[req.params.id]);
         if (playlistSongs.length<1) playlist.songList = {error:{status:"404", message:"API: Empty playlist"}};
         else playlist.songList = { id: playlist.id, songs: playlistSongs };
 
+        playlist.artists = [];
         const getPlaylistArtistsSQL = 'SELECT `login`,`pseudoname`,`username` FROM `view_playlist_artists` WHERE `playlistID` = ? ORDER BY `view_playlist_artists`.`artistPlaylistPosition`';
         const playlistArtists = await queryPromise(getPlaylistArtistsSQL,[req.params.id]);
-        playlist.artists = [];
         if (playlistArtists.length<1) { playlist.artists.push({name:"Unknown artist"}); }
         else
         {

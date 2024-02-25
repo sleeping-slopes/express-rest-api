@@ -29,8 +29,9 @@ exports.getByID = async (req,res) =>
         const song = songs[0];
         if (!song.name) song.name = "Unnamed song";
         song.cover=!!song.cover;
-        song.artists = [];
+        song.created_by_username = song.created_by_username || song.created_by;
 
+        song.artists = [];
         const getSongArtistsSQL = 'SELECT `login`,`username`,`pseudoname` FROM `view_song_artists` WHERE `songID` = ? ORDER BY `view_song_artists`.`artistSongPosition`';
         const songArtists = await queryPromise(getSongArtistsSQL,[req.params.id]);
         if (songArtists.length<1) { song.artists.push({name:"Unknown artist"}); }

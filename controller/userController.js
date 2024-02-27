@@ -2,7 +2,8 @@ const response = require('./../response')
 const queryPromise = require('../settings/database')
 
 const jwt = require('jsonwebtoken')
-const config = require('../config')
+
+require('dotenv').config()
 
 exports.postUser = async (req,res) =>
 {
@@ -23,7 +24,7 @@ exports.postUser = async (req,res) =>
 
         await queryPromise('INSERT INTO `users`(`login`,`email`,`password`) VALUES (?,?,?)', [req.body.login,req.body.email,req.body.password]);
 
-        const token = jwt.sign({ login: req.body.login },config.JWTSECRET);
+        const token = jwt.sign({ login: req.body.login },process.env.JWTSECRET);
         const currentUser = await queryPromise('SELECT `login`, `email`,`theme`, `custom_theme`, `profile_picture` FROM `users` WHERE `login` = ?',[req.body.login]);
         if (currentUser.length<1) return response.status(404,'API: User not found',res);
         const loginData = { loginData: {authJWT: "Bearer " + token, user: currentUser[0]} };

@@ -1,5 +1,4 @@
 const express = require('express');
-const config = require('./config');
 const cors = require("cors");
 const bodyParser = require('body-parser');
 
@@ -11,7 +10,9 @@ app.use(bodyParser.json());
 const routes = require('./routes/routes');
 routes(app);
 
-app.listen(config.API_PORT,config.API_HOST,()=>
+require('dotenv').config()
+
+app.listen(process.env.API_PORT,process.env.API_HOST,(error)=>
 {
-    console.log("app listen on "+config.API_HOST+":"+config.API_PORT)
+    console.log("server listen on "+process.env.API_HOST+":"+process.env.API_PORT)
 });

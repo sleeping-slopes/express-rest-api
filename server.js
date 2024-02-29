@@ -12,7 +12,7 @@ routes(app);
 
 require('dotenv').config()
 
-app.listen(process.env.API_PORT,process.env.API_HOST,(error)=>
+app.listen(process.env.API_PORT,(error)=>
 {
-    console.log("server listen on "+process.env.API_HOST+":"+process.env.API_PORT)
+    console.log("server listen on port "+process.env.API_PORT)
 });

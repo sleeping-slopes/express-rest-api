@@ -4,8 +4,8 @@
   "description": "node.js REST API",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "serve": "nodemon server.js"
+    "serve": "nodemon server.js",
+    "build": "node server.js"
   },
   "author": "",
   "license": "ISC",

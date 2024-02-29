@@ -4,6 +4,10 @@ const upload = multer({ storage: multerStorage });
 
 module.exports = (app) =>
 {
+    const miscController = require('../controller/miscController');
+    app.route("/").get(miscController.getError);
+    app.route("/api/error").get(miscController.getError);
+
     const middleware = require('./../middleware/middleware');
 
     const meController = require('../controller/meController');
@@ -74,6 +78,4 @@ module.exports = (app) =>
     app.route("/api/search/:q/songs").get(searchController.getSongs);
     app.route("/api/search/:q/playlists").get(searchController.getPlaylists);
     app.route("/api/search/:q/users").get(searchController.getUsers);
-
-    app.route("/api/error").get(searchController.getError);
 }

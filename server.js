@@ -12,8 +12,10 @@ routes(app);
 
 require('dotenv').config()
 
-app.listen(process.env.PORT,(error)=>
-{
-    if (error) return console.log("server error");
-    console.log("server listen on port "+process.env.PORT);
-});
+console.log("server started");
+
+// app.listen(process.env.PORT,(error)=>
+// {
+//     if (error) return console.log("server error");
+//     console.log("server listen on port "+process.env.PORT);
+// });

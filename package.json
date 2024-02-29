@@ -4,8 +4,8 @@
   "description": "node.js REST API",
   "main": "index.js",
   "scripts": {
-    "serve": "nodemon server.js",
-    "start": "node server.js"
+    "serve": "nodemon index.js",
+    "start": "node index.js"
   },
   "author": "",
   "license": "ISC",

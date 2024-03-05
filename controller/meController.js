@@ -12,7 +12,7 @@ exports.getMe = async (req,res) =>
         const users = await queryPromise('SELECT `login`, `email`, `custom_theme`, `theme`, `accent_color`, `profile_picture` FROM `users` WHERE `login` = ?',[req.user.login]);
         if (users.length<1) return response.status(404,'API: User not found',res);
         const user = users[0];
-
+        user.profile_picture = !!user.profile_picture;
         return response.status(200,user,res);
     }
     catch(error)

@@ -27,8 +27,8 @@ exports.postUser = async (req,res) =>
         const token = jwt.sign({ login: req.body.login },process.env.JWTSECRET);
         const currentUser = await queryPromise('SELECT `login`, `email`,`theme`, `custom_theme`, `profile_picture` FROM `users` WHERE `login` = ?',[req.body.login]);
         if (currentUser.length<1) return response.status(404,'API: User not found',res);
+        currentUser[0].profile_picture = !!currentUser[0].profile_picture;
         const loginData = { loginData: {authJWT: "Bearer " + token, user: currentUser[0]} };
-
         return response.status(201,loginData,res);
     }
     catch(error)

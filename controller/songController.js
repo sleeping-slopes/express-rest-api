@@ -52,7 +52,7 @@ exports.getByID = async (req,res) =>
             song.liked = !!songLikeExists[0].exists;
         }
         else song.liked = false;
-
+        song.lastUpdated = Date.now();
         return response.status(200,song,res);
     }
     catch(error)

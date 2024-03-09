@@ -83,7 +83,7 @@ exports.getProfile = async (req,res) =>
                 user.followsYou = !!userFollowExists[0].exists;
             }
         }
-
+        user.lastUpdated = Date.now();
         return response.status(200,user,res);
     }
     catch(error)

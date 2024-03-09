@@ -51,7 +51,7 @@ exports.getByID = async (req,res) =>
             playlist.liked = !!playlistLikeExists[0].exists;
         }
         else playlist.liked = false;
-
+        playlist.lastUpdated = Date.now();
         return response.status(200,playlist,res);
     }
     catch(error)
